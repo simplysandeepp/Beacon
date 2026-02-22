@@ -631,63 +631,51 @@ The frontend build acts as a basic type and compile integrity check.
 
 ## Screenshots Gallery
 
-Images below are attached in filename order from `frontend/assets`.
+### Website Screen Flow (Correct Order)
 
-### 1) `brd-draft.png`
-
-![brd-draft](frontend/assets/brd-draft.png)
-
-### 2) `brd-sharable-link.png`
-
-![brd-sharable-link](frontend/assets/brd-sharable-link.png)
-
-### 3) `dashbaord.png`
-
-![dashbaord](frontend/assets/dashbaord.png)
-
-### 4) `multiagent-flowchar.jpeg`
-
-![multiagent-flowchar](frontend/assets/multiagent-flowchar.jpeg)
-
-### 5) `settings.png`
-
-![settings](frontend/assets/settings.png)
-
-### 6) `source.png`
-
-![source](frontend/assets/source.png)
-
-### 7) `website_architectural-flowchart.jpeg`
-
-![website_architectural-flowchart](frontend/assets/website_architectural-flowchart.jpeg)
-
-### 8) `website1.png`
-
+1. `website1.png`  
 ![website1](frontend/assets/website1.png)
 
-### 9) `website2.png`
-
+2. `website2.png`  
 ![website2](frontend/assets/website2.png)
 
-### 10) `website3.png`
-
+3. `website3.png`  
 ![website3](frontend/assets/website3.png)
 
-### 11) `website4.png`
-
+4. `website4.png`  
 ![website4](frontend/assets/website4.png)
 
-### 12) `website5.png`
-
+5. `website5.png`  
 ![website5](frontend/assets/website5.png)
 
-### 13) `website6.png`
-
+6. `website6.png`  
 ![website6](frontend/assets/website6.png)
 
-### 14) `website7.png`
-
+7. `website7.png`  
 ![website7](frontend/assets/website7.png)
+
+### Additional Screens And Diagrams
+
+1. `brd-draft.png`  
+![brd-draft](frontend/assets/brd-draft.png)
+
+2. `brd-sharable-link.png`  
+![brd-sharable-link](frontend/assets/brd-sharable-link.png)
+
+3. `dashbaord.png`  
+![dashbaord](frontend/assets/dashbaord.png)
+
+4. `settings.png`  
+![settings](frontend/assets/settings.png)
+
+5. `source.png`  
+![source](frontend/assets/source.png)
+
+6. `multiagent-flowchar.jpeg`  
+![multiagent-flowchar](frontend/assets/multiagent-flowchar.jpeg)
+
+7. `website_architectural-flowchart.jpeg`  
+![website_architectural-flowchart](frontend/assets/website_architectural-flowchart.jpeg)
 
 ---
 
