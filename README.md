@@ -38,7 +38,7 @@ Beacon is an AI-assisted Business Requirements Document platform that converts s
 
 | Name | Role | GitHub ID |
 | --- | --- | --- |
-| Sandeep Prajapati | Project Lead / Repository Owner | [@simplysandeepp](https://github.com/simplysandeepp) |
+| Sandeep Prajapati | Teammate | [@simplysandeepp](https://github.com/simplysandeepp) |
 | Kurian Jose | Teammate | [@KurianJose7586](https://github.com/KurianJose7586/) |
 | Preet Biswas | Teammate | [@preetbiswas12](https://github.com/preetbiswas12) |
 | Aryan Singh | Teammate | [@DevAryanSin](https://github.com/DevAryanSin) |
