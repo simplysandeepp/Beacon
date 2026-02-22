@@ -64,6 +64,7 @@ Beacon is an AI-assisted Business Requirements Document platform that converts s
 17. [Testing](#testing)
 18. [Known Gaps And Practical Notes](#known-gaps-and-practical-notes)
 19. [Screenshots Gallery](#screenshots-gallery)
+20. [Social Handles](#social-handle)
 
 ## Project Summary
 
@@ -708,8 +709,6 @@ If you want, this README can be extended further with:
 - environment matrix per dev/staging/prod
 
 ---
-
-## Footer
 
 # Thankyou :) 🎀
 
