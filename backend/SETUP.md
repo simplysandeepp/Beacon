@@ -75,6 +75,15 @@ uvicorn api.main:app --reload --port 8000
 The API will be available at `http://localhost:8000`.
 You can access the interactive documentation (Swagger UI) at `http://localhost:8000/docs`.
 
+### Start the FastAPI Server with Local HTTPS for OAuth
+Slack requires an HTTPS localhost redirect URL. Use the helper script below on Windows to generate a temporary localhost certificate, trust it for the current user, and start uvicorn with TLS on port 8000.
+
+```powershell
+.\start-https.ps1
+```
+
+The API will then be available at `https://localhost:8000`.
+
 ## 🧪 Testing
 To run the automated tests:
 ```bash

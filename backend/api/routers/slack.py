@@ -31,6 +31,7 @@ router = APIRouter(prefix="/integrations/slack", tags=["Slack Integration"])
 SLACK_SCOPES = ",".join(
     [
         "channels:read",
+        "channels:join",
         "groups:read",
         "channels:history",
         "groups:history",
@@ -62,24 +63,15 @@ def _clean_stale_states() -> None:
 
 
 def _get_redirect_uri() -> str:
-    def _prefer_https_for_localhost(url: str) -> str:
-        if url.startswith("http://localhost") or url.startswith("http://127.0.0.1"):
-            return "https://" + url[len("http://") :]
-        return url
-
     redirect_uri = os.getenv("SLACK_REDIRECT_URI")
     if redirect_uri:
-        normalized = _prefer_https_for_localhost(redirect_uri.strip().rstrip("/"))
+        normalized = redirect_uri.strip().rstrip("/")
         # Auto-migrate stale legacy callback paths to the active API callback route.
         if normalized.endswith("/slack/oauth_redirect"):
-            backend_public_url = _prefer_https_for_localhost(
-                os.getenv("BACKEND_PUBLIC_URL", "http://localhost:8000").rstrip("/")
-            )
+            backend_public_url = os.getenv("BACKEND_PUBLIC_URL", "http://localhost:8000").rstrip("/")
             return f"{backend_public_url}/integrations/slack/auth/callback"
         return normalized
-    backend_public_url = _prefer_https_for_localhost(
-        os.getenv("BACKEND_PUBLIC_URL", "http://localhost:8000").rstrip("/")
-    )
+    backend_public_url = os.getenv("BACKEND_PUBLIC_URL", "http://localhost:8000").rstrip("/")
     return f"{backend_public_url}/integrations/slack/auth/callback"
 
 
@@ -263,18 +255,55 @@ def ingest_slack_channels(body: SlackIngestRequest):
     user_cache: Dict[str, str] = {}
     chunk_dicts: List[dict] = []
     per_channel_counts: Dict[str, int] = {}
+    inaccessible_channels: List[Dict[str, str]] = []
 
     try:
         for channel_id in body.channel_ids:
             fetched_for_channel = 0
             cursor = None
+            attempted_join = False
             while fetched_for_channel < body.limit_per_channel:
                 remaining = body.limit_per_channel - fetched_for_channel
-                response = client.conversations_history(
-                    channel=channel_id,
-                    limit=min(200, remaining),
-                    cursor=cursor,
-                )
+                try:
+                    response = client.conversations_history(
+                        channel=channel_id,
+                        limit=min(200, remaining),
+                        cursor=cursor,
+                    )
+                except SlackApiError as exc:
+                    slack_error = str((getattr(exc, "response", None) or {}).get("error", ""))
+                    if slack_error == "not_in_channel" and not attempted_join:
+                        is_private = False
+                        try:
+                            info = client.conversations_info(channel=channel_id)
+                            is_private = bool((info.get("channel") or {}).get("is_private"))
+                        except SlackApiError:
+                            # If metadata lookup fails, try a join once for public channels.
+                            is_private = False
+
+                        if is_private:
+                            inaccessible_channels.append(
+                                {
+                                    "channel_id": channel_id,
+                                    "reason": "Bot is not a member of this private channel.",
+                                }
+                            )
+                            break
+
+                        try:
+                            client.conversations_join(channel=channel_id)
+                            attempted_join = True
+                            continue
+                        except SlackApiError as join_exc:
+                            join_error = str((getattr(join_exc, "response", None) or {}).get("error", "unknown"))
+                            inaccessible_channels.append(
+                                {
+                                    "channel_id": channel_id,
+                                    "reason": f"Unable to join channel automatically ({join_error}).",
+                                }
+                            )
+                            break
+                    raise
                 messages = response.get("messages", [])
                 if not messages:
                     break
@@ -319,7 +348,10 @@ def ingest_slack_channels(body: SlackIngestRequest):
         raise HTTPException(status_code=500, detail=f"Slack ingestion failed: {exc}") from exc
 
     if not chunk_dicts:
-        raise HTTPException(status_code=400, detail="No usable Slack messages found in selected channels.")
+        detail = "No usable Slack messages found in selected channels."
+        if inaccessible_channels:
+            detail = f"{detail} Inaccessible channels: {inaccessible_channels}"
+        raise HTTPException(status_code=400, detail=detail)
 
     try:
         api_key = os.environ.get("GROQ_CLOUD_API")
@@ -354,5 +386,6 @@ def ingest_slack_channels(body: SlackIngestRequest):
         "session_id": body.session_id,
         "selected_channels": body.channel_ids,
         "channel_message_counts": per_channel_counts,
+        "inaccessible_channels": inaccessible_channels,
         "chunk_count": len(classified),
     }

@@ -46,6 +46,11 @@ git_status*.txt
 *.swo
 *~
 start-backend.ps1.backup
+.certs/
+*.pem
+*.key
+*.pfx
+
 
 # Dataset (large files)
 emails.csv

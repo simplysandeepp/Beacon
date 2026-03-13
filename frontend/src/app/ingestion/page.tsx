@@ -346,19 +346,21 @@ export default function IngestionPage() {
 
     useEffect(() => {
         const slackParam = searchParams.get('slack');
+        const slackReason = searchParams.get('reason');
         if (slackParam === 'connected') {
             setSlackMessage('Slack workspace connected.');
             syncSlackData();
         } else if (slackParam === 'error') {
-            setUploadError('Slack OAuth failed. Please try again.');
+            setUploadError(slackReason ? `Slack OAuth failed: ${slackReason}` : 'Slack OAuth failed. Please try again.');
         }
 
         const gmailParam = searchParams.get('gmail');
+        const gmailReason = searchParams.get('reason');
         if (gmailParam === 'connected') {
             setGmailMessage('Gmail connected.');
             syncGmailData();
         } else if (gmailParam === 'error') {
-            setUploadError('Gmail OAuth failed. Please try again.');
+            setUploadError(gmailReason ? `Gmail OAuth failed: ${gmailReason}` : 'Gmail OAuth failed. Please try again.');
         }
     }, [searchParams]);
 

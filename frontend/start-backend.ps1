@@ -1,4 +1,5 @@
 Write-Host "Starting BRD Generation API Backend..." -ForegroundColor Green
 Write-Host ""
-Set-Location $PSScriptRoot
-uvicorn api.main:app --reload --port 8000
+$backendRoot = Join-Path (Split-Path $PSScriptRoot -Parent) 'backend'
+Set-Location $backendRoot
+& .\start-https.ps1
