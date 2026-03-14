@@ -136,6 +136,20 @@ export interface GmailStatus {
     message: string;
 }
 
+export interface GmailIngestResponse {
+    message: string;
+    session_id: string;
+    item_count: number;
+}
+
+export interface GmailEmail {
+    subject: string;
+    from: string;
+    body: string;
+    message_id: string;
+    attachments: any[];
+}
+
 export async function createSession(): Promise<Session> {
     return apiFetch<Session>("/sessions/", { method: "POST" });
 }
@@ -384,52 +398,33 @@ export async function ingestSlackChannels(
 }
 
 export async function getGmailStatus(): Promise<GmailStatus> {
-    const checkUrl = joinUrl(BASE, "/gmail/check?count=1");
-    try {
-        const res = await fetch(checkUrl, {
-            method: "GET",
-            redirect: "manual",
-        });
-
-        if (res.status === 404) {
-            return {
-                available: false,
-                connected: false,
-                message: "Gmail API is not available on this backend.",
-            };
-        }
-        if (res.status === 401) {
-            return {
-                available: true,
-                connected: false,
-                message: "Gmail API is available. Authentication required.",
-            };
-        }
-        if (res.ok) {
-            return {
-                available: true,
-                connected: true,
-                message: "Gmail is connected.",
-            };
-        }
-
-        const detail = await res.text().catch(() => "");
-        return {
-            available: true,
-            connected: false,
-            message: detail || `Gmail status check returned ${res.status}.`,
-        };
-    } catch (e) {
-        return {
-            available: false,
-            connected: false,
-            message: e instanceof Error ? e.message : "Unable to reach Gmail API.",
-        };
-    }
+    return apiFetch<GmailStatus>("/integrations/gmail/status");
 }
 
-export function getGmailLoginUrl(): string {
-    return joinUrl(BASE, "/gmail/login");
+export async function getGmailOAuthUrl(): Promise<string> {
+    return joinUrl(BASE, "/integrations/gmail/auth/start");
+}
+
+export async function disconnectGmail(): Promise<{ message: string }> {
+    return apiFetch<{ message: string }>("/integrations/gmail/disconnect", { method: "POST" });
+}
+
+export async function listGmailEmails(count: number = 10): Promise<{ count: number; emails: GmailEmail[] }> {
+    return apiFetch<{ count: number; emails: GmailEmail[] }>(`/integrations/gmail/check?count=${count}`);
+}
+
+export async function ingestGmailEmails(
+    sessionId: string,
+    messageIds: string[]
+): Promise<GmailIngestResponse> {
+    return apiFetch<GmailIngestResponse>("/integrations/gmail/ingest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            session_id: sessionId,
+            message_ids: messageIds,
+        }),
+    });
 }
 
 export type ExportFormat = "markdown" | "html" | "docx";

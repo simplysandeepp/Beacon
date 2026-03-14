@@ -24,8 +24,15 @@ import {
     getChunks,
     ingestSlackChannels,
     listSlackChannels,
+    getGmailStatus,
+    getGmailOAuthUrl,
+    disconnectGmail,
+    listGmailEmails,
+    ingestGmailEmails,
     type SlackChannel,
     type SlackStatus,
+    type GmailEmail,
+    type GmailStatus,
 } from "@/lib/apiClient";
 
 const dataSources = [
@@ -43,7 +50,7 @@ const dataSources = [
         icon: Mail,
         color: "from-red-500 to-orange-500",
         description: "Sync email threads and discussions",
-        available: false,
+        available: true,
     },
     {
         id: "teams",
@@ -94,12 +101,20 @@ export default function ProfilePage() {
     const [slackError, setSlackError] = useState<string | null>(null);
     const [slackMessage, setSlackMessage] = useState<string | null>(null);
 
+    const [gmailStatus, setGmailStatus] = useState<GmailStatus | null>(null);
+    const [gmailEmails, setGmailEmails] = useState<GmailEmail[]>([]);
+    const [selectedGmailEmails, setSelectedGmailEmails] = useState<string[]>([]);
+    const [gmailLoading, setGmailLoading] = useState(false);
+    const [gmailIngesting, setGmailIngesting] = useState(false);
+    const [gmailError, setGmailError] = useState<string | null>(null);
+    const [gmailMessage, setGmailMessage] = useState<string | null>(null);
+
     const [totalChunks, setTotalChunks] = useState(0);
     const [activeChunks, setActiveChunks] = useState(0);
     const [noiseChunks, setNoiseChunks] = useState(0);
     const [statsLoading, setStatsLoading] = useState(false);
 
-    const activeSources = useMemo(() => (slackStatus?.connected ? 1 : 0), [slackStatus?.connected]);
+    const activeSources = useMemo(() => (slackStatus?.connected ? 1 : 0) + (gmailStatus?.connected ? 1 : 0), [slackStatus?.connected, gmailStatus?.connected]);
     const relevancePct = totalChunks > 0 ? Math.round((activeChunks / totalChunks) * 100) : 0;
 
     const syncSlackStatus = async () => {
@@ -152,6 +167,40 @@ export default function ProfilePage() {
         }
     };
 
+    const syncGmailStatus = async () => {
+        setGmailLoading(true);
+        setGmailError(null);
+        try {
+            const status = await getGmailStatus();
+            setGmailStatus(status);
+
+            if (status.connected) {
+                const emailsRes = await listGmailEmails(20);
+                setGmailEmails(emailsRes.emails);
+
+                const gmailIntegration = integrations.find((i) => i.type === "gmail");
+                if (gmailIntegration) {
+                    updateIntegration(gmailIntegration.id, {
+                        connected: true,
+                    });
+                }
+            } else {
+                setGmailEmails([]);
+                setSelectedGmailEmails([]);
+                const gmailIntegration = integrations.find((i) => i.type === "gmail");
+                if (gmailIntegration) {
+                    updateIntegration(gmailIntegration.id, {
+                        connected: false,
+                    });
+                }
+            }
+        } catch (e) {
+            setGmailError(e instanceof Error ? e.message : "Failed to load Gmail status");
+        } finally {
+            setGmailLoading(false);
+        }
+    };
+
     const loadSessionStats = async () => {
         if (!activeSessionId) {
             setTotalChunks(0);
@@ -179,6 +228,7 @@ export default function ProfilePage() {
 
     useEffect(() => {
         syncSlackStatus();
+        syncGmailStatus();
     }, []);
 
     useEffect(() => {
@@ -187,12 +237,23 @@ export default function ProfilePage() {
 
     useEffect(() => {
         const slackParam = searchParams.get("slack");
-        if (!slackParam) return;
-        if (slackParam === "connected") {
-            setSlackMessage("Slack workspace connected successfully.");
-            syncSlackStatus();
-        } else if (slackParam === "error") {
-            setSlackError("Slack OAuth failed. Please try again.");
+        if (slackParam) {
+            if (slackParam === "connected") {
+                setSlackMessage("Slack workspace connected successfully.");
+                syncSlackStatus();
+            } else if (slackParam === "error") {
+                setSlackError("Slack OAuth failed. Please try again.");
+            }
+        }
+
+        const gmailParam = searchParams.get("gmail");
+        if (gmailParam) {
+            if (gmailParam === "connected") {
+                setGmailMessage("Gmail connected successfully.");
+                syncGmailStatus();
+            } else if (gmailParam === "error") {
+                setGmailError("Gmail OAuth failed. Please try again.");
+            }
         }
     }, [searchParams]);
 
@@ -248,6 +309,50 @@ export default function ProfilePage() {
             setSlackError(e instanceof Error ? e.message : "Slack ingestion failed");
         } finally {
             setSlackIngesting(false);
+        }
+    };
+
+    const connectGmail = async () => {
+        setGmailError(null);
+        try {
+            const authUrl = await getGmailOAuthUrl();
+            window.location.href = authUrl;
+        } catch (e) {
+            setGmailError(e instanceof Error ? e.message : "Failed to start Gmail OAuth");
+        }
+    };
+
+    const disconnectGmailAccount = async () => {
+        setGmailError(null);
+        try {
+            await disconnectGmail();
+            setGmailMessage("Gmail disconnected.");
+            await syncGmailStatus();
+        } catch (e) {
+            setGmailError(e instanceof Error ? e.message : "Failed to disconnect Gmail");
+        }
+    };
+
+    const ingestSelectedGmailEmails = async () => {
+        if (!activeSessionId) {
+            setGmailError("Select an active BRD session before ingesting Gmail emails.");
+            return;
+        }
+        if (selectedGmailEmails.length === 0) {
+            setGmailError("Select at least one email to ingest.");
+            return;
+        }
+
+        setGmailIngesting(true);
+        setGmailError(null);
+        try {
+            const result = await ingestGmailEmails(activeSessionId, selectedGmailEmails);
+            setGmailMessage(result.message);
+            await loadSessionStats();
+        } catch (e) {
+            setGmailError(e instanceof Error ? e.message : "Gmail ingestion failed");
+        } finally {
+            setGmailIngesting(false);
         }
     };
 
@@ -329,13 +434,13 @@ export default function ProfilePage() {
                 </div>
             )}
 
-            {(slackError || slackMessage) && (
+            {(slackError || slackMessage || gmailError || gmailMessage) && (
                 <div
                     className={`rounded-xl border px-4 py-3 text-sm ${
-                        slackError ? "border-red-500/20 bg-red-500/10 text-red-300" : "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
+                        (slackError || gmailError) ? "border-red-500/20 bg-red-500/10 text-red-300" : "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
                     }`}
                 >
-                    {slackError ?? slackMessage}
+                    {slackError ?? slackMessage ?? gmailError ?? gmailMessage}
                 </div>
             )}
 
@@ -349,7 +454,8 @@ export default function ProfilePage() {
                     {dataSources.map((source) => {
                         const Icon = source.icon;
                         const isSlack = source.id === "slack";
-                        const isConnected = isSlack ? Boolean(slackStatus?.connected) : false;
+                        const isGmail = source.id === "gmail";
+                        const isConnected = isSlack ? Boolean(slackStatus?.connected) : isGmail ? Boolean(gmailStatus?.connected) : false;
 
                         return (
                             <div key={source.id} className="bg-zinc-900/50 border border-white/5 rounded-xl p-6 hover:border-white/10 transition-all group">
@@ -410,25 +516,62 @@ export default function ProfilePage() {
                                     </div>
                                 )}
 
-                                {isSlack ? (
+                                {isGmail && isConnected && (
+                                    <div className="mb-4 space-y-2">
+                                        <div className="flex items-center justify-between text-xs">
+                                            <span className="text-zinc-500">Status</span>
+                                            <span className="text-emerald-400">Authenticated</span>
+                                        </div>
+                                        <div className="space-y-1.5 pt-2">
+                                            <p className="text-[10px] uppercase tracking-wider text-zinc-500">Recent Emails</p>
+                                            <div className="max-h-28 overflow-y-auto pr-1 space-y-1">
+                                                {gmailEmails.length === 0 ? (
+                                                    <p className="text-[11px] text-zinc-500">{gmailLoading ? "Loading emails..." : "No emails found"}</p>
+                                                ) : (
+                                                    gmailEmails.map((email) => (
+                                                        <label key={email.message_id} className="flex items-center gap-2 text-xs text-zinc-300">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={selectedGmailEmails.includes(email.message_id)}
+                                                                onChange={() =>
+                                                                    setSelectedGmailEmails((prev) =>
+                                                                        prev.includes(email.message_id)
+                                                                            ? prev.filter((id) => id !== email.message_id)
+                                                                            : [...prev, email.message_id]
+                                                                    )
+                                                                }
+                                                                className="w-3.5 h-3.5 accent-red-400"
+                                                            />
+                                                            <span className="truncate" title={email.subject}>{email.subject || "(No Subject)"}</span>
+                                                        </label>
+                                                    ))
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {isSlack || isGmail ? (
                                     <div className="space-y-2">
                                         <button
-                                            onClick={isConnected ? disconnectSlackWorkspace : connectSlack}
+                                            onClick={isSlack ? (isConnected ? disconnectSlackWorkspace : connectSlack) : (isConnected ? disconnectGmailAccount : connectGmail)}
                                             className={`w-full px-4 py-2.5 rounded-lg font-medium text-sm transition-colors ${
                                                 isConnected
                                                     ? "bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20"
-                                                    : "bg-cyan-500 hover:bg-cyan-600 text-white"
+                                                    : isSlack ? "bg-cyan-500 hover:bg-cyan-600 text-white" : "bg-red-500 hover:bg-red-600 text-white"
                                             }`}
                                         >
-                                            {isConnected ? "Disconnect Slack" : "Connect Slack"}
+                                            {isConnected ? `Disconnect ${isSlack ? "Slack" : "Gmail"}` : `Connect ${isSlack ? "Slack" : "Gmail"}`}
                                         </button>
                                         {isConnected && (
                                             <button
-                                                onClick={ingestSelectedSlackChannels}
-                                                disabled={slackIngesting || selectedSlackChannels.length === 0}
-                                                className="w-full px-4 py-2.5 rounded-lg font-medium text-sm transition-colors bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/20 disabled:opacity-50"
+                                                onClick={isSlack ? ingestSelectedSlackChannels : ingestSelectedGmailEmails}
+                                                disabled={(isSlack ? (slackIngesting || selectedSlackChannels.length === 0) : (gmailIngesting || selectedGmailEmails.length === 0))}
+                                                className={`w-full px-4 py-2.5 rounded-lg font-medium text-sm transition-colors border hover:bg-opacity-20 disabled:opacity-50 ${
+                                                    isSlack ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/30 hover:bg-cyan-500/20" : "bg-red-500/10 text-red-300 border-red-500/30 hover:bg-red-500/20"
+                                                }`}
                                             >
-                                                {slackIngesting ? "Ingesting..." : "Ingest Selected Channels"}
+                                                {(isSlack ? (slackIngesting ? "Ingesting..." : "Ingest Selected Channels") : (gmailIngesting ? "Ingesting..." : "Ingest Selected Emails"))}
                                             </button>
                                         )}
                                     </div>
