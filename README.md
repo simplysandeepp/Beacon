@@ -24,6 +24,14 @@
 
 </div>
 
+<p align="center">
+  <a href="https://youtu.be/OpVqMymtw5Q">
+    <img src="https://img.youtube.com/vi/OpVqMymtw5Q/hqdefault.jpg" width="300" alt="Prototype Demo"/>
+  </a>
+  <br>
+  <sub>Click to watch working prototype</sub>
+</p>
+
 ---
 
 ## Table of Contents
