@@ -1,7 +1,10 @@
-# Environment variables
+# Environment variables — never commit any of these
 .env
+.env.local
+.env*.local
 .env.backup
 .env.bak
+vercel.env
 
 # Databases
 *.db

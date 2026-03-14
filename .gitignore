@@ -1,1 +1,74 @@
+# ─── Environment & Secrets ────────────────────────────────────────────
+.env
 .env.local
+.env*.local
+.env.development
+.env.test
+.env.production
+.env.backup
+.env.bak
+vercel.env
+*.pem
+*.key
+*.pfx
+.certs/
+
+# ─── Python Cache & Build ──────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+
+# ─── Virtual Environments ──────────────────────────────────────────────
+env/
+venv/
+.venv/
+
+# ─── Testing & Coverage ────────────────────────────────────────────────
+.pytest_cache/
+coverage/
+test_output*.txt
+test_output*.log
+
+# ─── Databases ─────────────────────────────────────────────────────────
+*.db
+*.sqlite3
+*.db.backup
+
+# ─── Logs & Debug Output ───────────────────────────────────────────────
+*.log
+pipeline_debug.log
+verification_output*.txt
+diff_brd.txt
+tsc.txt
+tsc_errors.txt
+brd_output_*.md
+
+# ─── Large Datasets ────────────────────────────────────────────────────
+emails.csv
+
+# ─── Node / Next.js ────────────────────────────────────────────────────
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ─── Vercel ────────────────────────────────────────────────────────────
+.vercel
+
+# ─── IDEs & OS ─────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
