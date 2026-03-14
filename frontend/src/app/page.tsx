@@ -402,7 +402,7 @@ function Footer() {
     return (
         <footer className="w-full bg-[#09090B] text-white px-6 py-16 flex flex-col items-center justify-center text-sm relative overflow-hidden">
             {/* Top Section */}
-            <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-4 gap-12 text-left mb-20">
+            <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-5 gap-10 text-left mb-20">
                 {/* Left Column - Brand (wider) */}
                 <div className="md:col-span-2 flex flex-col gap-6">
                     <div className="flex items-center gap-2">
@@ -427,11 +427,15 @@ function Footer() {
                     </div>
 
                     <p className="text-gray-600 text-xs mt-4">
-                        © {new Date().getFullYear()} Beacon. All rights reserved.
+                        © {new Date().getFullYear()} Beacon. Built by{' '}
+                        <a href="https://www.sandeepp.in/" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white transition-colors">
+                            Sandeep Prajapati
+                        </a>
+                        . All rights reserved.
                     </p>
                 </div>
 
-                {/* Middle Column - Product Links */}
+                {/* Product Links */}
                 <div className="flex flex-col gap-4">
                     <h4 className="text-[10px] font-mono text-zinc-600 tracking-widest uppercase font-bold">Product</h4>
                     <ul className="space-y-3 flex flex-col">
@@ -452,27 +456,68 @@ function Footer() {
                     </ul>
                 </div>
 
-                {/* Right Column - Resources Links */}
+                {/* Resources Links */}
                 <div className="flex flex-col gap-4">
                     <h4 className="text-[10px] font-mono text-zinc-600 tracking-widest uppercase font-bold">Resources</h4>
                     <ul className="space-y-3 flex flex-col">
                         {[
-                            { label: 'Documentation', href: 'https://docs.beacon.ai' },
-                            { label: 'GitHub', href: 'https://github.com' },
-                            { label: 'Contact', href: 'mailto:team@beacon.ai' },
+                            { label: 'GitHub Repo', href: 'https://github.com/simplysandeepp/Beacon' },
+                            { label: 'Contributing', href: 'https://github.com/simplysandeepp/Beacon/blob/main/CONTRIBUTING.md' },
+                            { label: 'Deploy Guide', href: 'https://github.com/simplysandeepp/Beacon/blob/main/DEPLOY-GUIDE.md' },
                             { label: 'Privacy Policy', href: '#' },
                             { label: 'Terms of Use', href: '#' },
                             { label: 'AI Disclaimer', href: '#' },
                         ].map(({ label, href }) => (
                             <li key={label}>
-                                <a 
-                                    href={href} 
-                                    target={href.startsWith('http') || href.startsWith('mailto') ? '_blank' : undefined}
+                                <a
+                                    href={href}
+                                    target={href.startsWith('http') ? '_blank' : undefined}
                                     rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
                                     className="text-sm text-zinc-400 hover:text-zinc-100 transition-colors inline-flex items-center gap-1"
                                 >
                                     {label}
-                                    {(href.startsWith('http') && !href.includes('github')) && <ExternalLink size={9} />}
+                                    {href.startsWith('http') && <ExternalLink size={9} />}
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+                {/* Team */}
+                <div className="flex flex-col gap-4">
+                    <h4 className="text-[10px] font-mono text-zinc-600 tracking-widest uppercase font-bold">Team</h4>
+                    <ul className="space-y-4 flex flex-col">
+                        {/* Lead */}
+                        <li className="flex flex-col gap-0.5">
+                            <a
+                                href="https://www.sandeepp.in/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-white font-medium hover:text-zinc-300 transition-colors"
+                            >
+                                Sandeep Prajapati
+                            </a>
+                            <span className="text-[10px] text-zinc-600">Team Lead</span>
+                            <div className="flex items-center gap-2 mt-0.5">
+                                <a href="https://www.sandeepp.in/" target="_blank" rel="noopener noreferrer" className="text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors inline-flex items-center gap-0.5">Portfolio <ExternalLink size={8} /></a>
+                                <span className="text-zinc-700">·</span>
+                                <a href="https://github.com/simplysandeepp/" target="_blank" rel="noopener noreferrer" className="text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors inline-flex items-center gap-0.5">GitHub <ExternalLink size={8} /></a>
+                            </div>
+                        </li>
+                        {/* Teammates */}
+                        {[
+                            { name: 'Kurian Jose', github: 'https://github.com/KurianJose7586' },
+                            { name: 'Aryan Singh', github: 'https://github.com/DevAryanSin' },
+                            { name: 'Preet Biswas', github: 'https://github.com/preetbiswas12' },
+                        ].map(({ name, github }) => (
+                            <li key={name} className="flex flex-col gap-0.5">
+                                <a
+                                    href={github}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm text-zinc-400 hover:text-zinc-100 transition-colors inline-flex items-center gap-1"
+                                >
+                                    {name} <ExternalLink size={9} />
                                 </a>
                             </li>
                         ))}
