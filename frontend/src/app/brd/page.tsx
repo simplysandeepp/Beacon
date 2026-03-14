@@ -230,7 +230,7 @@ export default function BRDPage() {
     const { activeSessionId, sessions } = useSessionStore();
     const { user } = useAuth();
     const sessionId = activeSessionId ?? "";
-    const { sections, flags: apiFlags, loading, generating, error, generateAll, loadBRD, updateSection } = useBRDStore();
+    const { sections, flags: apiFlags, loading, generating, error, generateAll, loadBRD, updateSection, acknowledgedFlagKeys, acknowledgeFlag } = useBRDStore();
 
     const [flagsExpanded, setFlagsExpanded] = useState(false);
     const [flags, setFlags] = useState<ValidationFlagView[]>([]);
@@ -280,16 +280,19 @@ export default function BRDPage() {
 
     useEffect(() => {
         setFlags(
-            apiFlags.map((f, i) => ({
-                id: String(i),
-                section: f.section_name,
-                type: f.flag_type,
-                severity: f.severity,
-                description: f.description,
-                acknowledged: false,
-            }))
+            apiFlags.map((f, i) => {
+                const key = `${f.section_name}::${f.flag_type}::${f.description}`;
+                return {
+                    id: String(i),
+                    section: f.section_name,
+                    type: f.flag_type,
+                    severity: f.severity,
+                    description: f.description,
+                    acknowledged: acknowledgedFlagKeys.includes(key),
+                };
+            })
         );
-    }, [apiFlags]);
+    }, [apiFlags, acknowledgedFlagKeys]);
 
     const displaySections: BRDSectionView[] = useMemo(
         () =>
@@ -434,11 +437,13 @@ export default function BRDPage() {
                                                     </div>
                                                     {!flag.acknowledged && (
                                                         <button
-                                                            onClick={() =>
+                                                            onClick={() => {
+                                                                const key = `${flag.section}::${flag.type}::${flag.description}`;
+                                                                acknowledgeFlag(key);
                                                                 setFlags((prev) =>
                                                                     prev.map((f) => (f.id === flag.id ? { ...f, acknowledged: true } : f))
-                                                                )
-                                                            }
+                                                                );
+                                                            }}
                                                             className="text-[11px] text-zinc-400 hover:text-zinc-200 flex-shrink-0 bg-white/5 px-2.5 py-1 rounded-lg transition-colors"
                                                         >
                                                             Acknowledge

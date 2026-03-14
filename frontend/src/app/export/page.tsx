@@ -17,6 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { exportBRD, getBRD, getChunks, type ExportFormat } from "@/lib/apiClient";
 import { useSessionStore } from "@/store/useSessionStore";
+import { useBRDStore } from "@/store/useBRDStore";
 
 interface CheckItem {
     id: string;
@@ -80,6 +81,7 @@ function countGeneratedSections(sections: Record<string, string | undefined>): {
 
 export default function ExportPage() {
     const { activeSessionId, sessions } = useSessionStore();
+    const { acknowledgedFlagKeys } = useBRDStore();
     const sessionId = activeSessionId ?? "";
     const activeSession = sessions.find((s) => s.id === sessionId);
 
@@ -111,8 +113,12 @@ export default function ExportPage() {
             try {
                 const [chunksRes, brdRes] = await Promise.all([getChunks(sessionId, "all"), getBRD(sessionId, "markdown")]);
                 setChunksTotal(chunksRes.count);
-                setFlagsTotal(brdRes.flags.length);
-                setHighFlags(brdRes.flags.filter((f) => f.severity === "high").length);
+                // Exclude flags the user has already acknowledged in the BRD review page
+                const unacknowledged = brdRes.flags.filter(
+                    (f) => !acknowledgedFlagKeys.includes(`${f.section_name}::${f.flag_type}::${f.description}`)
+                );
+                setFlagsTotal(unacknowledged.length);
+                setHighFlags(unacknowledged.filter((f) => f.severity === "high").length);
 
                 const { generated, insufficient } = countGeneratedSections(brdRes.sections);
                 setGeneratedSections(generated);
@@ -128,7 +134,7 @@ export default function ExportPage() {
         };
 
         loadChecks();
-    }, [sessionId]);
+    }, [sessionId, acknowledgedFlagKeys]);
 
     const checklist: CheckItem[] = useMemo(() => {
         const hasSessionName = Boolean(activeSession?.name?.trim()) && activeSession?.name !== "Untitled Session";

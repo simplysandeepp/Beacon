@@ -29,6 +29,7 @@ export interface BRDSection {
 interface BRDStore {
     sections: BRDSection[];
     flags: ValidationFlag[];
+    acknowledgedFlagKeys: string[];
     snapshotId: string | null;
     loading: boolean;
     generating: boolean;
@@ -36,6 +37,7 @@ interface BRDStore {
     generateAll: (sessionId: string) => Promise<void>;
     loadBRD: (sessionId: string) => Promise<void>;
     updateSection: (sessionId: string, sectionId: string, content: string) => Promise<void>;
+    acknowledgeFlag: (key: string) => void;
 }
 
 const SECTION_META: { id: keyof BRDSections; title: string }[] = [
@@ -65,6 +67,7 @@ function sectionsFromAPI(raw: BRDSections, meta: Record<string, BRDSectionMeta>)
 export const useBRDStore = create<BRDStore>((set, get) => ({
     sections: SECTION_META.map(({ id, title }) => ({ id: id as string, title, content: '', citations: [] })),
     flags: [],
+    acknowledgedFlagKeys: [],
     snapshotId: null,
     loading: false,
     generating: false,
@@ -130,5 +133,17 @@ export const useBRDStore = create<BRDStore>((set, get) => ({
         } finally {
             set({ loading: false });
         }
+    },
+
+    /**
+     * Mark a validation flag as acknowledged so the export page respects the user's decision.
+     * key should be a stable composite: `${section_name}::${flag_type}::${description}`.
+     */
+    acknowledgeFlag: (key: string) => {
+        set((state) => ({
+            acknowledgedFlagKeys: state.acknowledgedFlagKeys.includes(key)
+                ? state.acknowledgedFlagKeys
+                : [...state.acknowledgedFlagKeys, key],
+        }));
     },
 }));

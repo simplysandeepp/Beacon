@@ -21,10 +21,13 @@ from brd_module.storage import create_snapshot, get_signals_for_snapshot, store_
 from brd_module.hitl.versioned_ledger import is_section_locked, get_section_content, create_new_version
 
 def call_llm_with_retry(client: Groq, messages: List[Dict[str, str]], json_mode: bool = False, max_tokens: int = 2048) -> str:
-    """Rate limit handler for llama-3.1-8b-instant."""
-    MODEL_NAME = "llama-3.1-8b-instant"
+    """Resilient LLM caller with exponential backoff. Model is resolved from GROQ_MODEL env var
+    or defaults to llama-3.3-70b-versatile for improved reasoning quality."""
+    MODEL_NAME = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
     response_format = {"type": "json_object"} if json_mode else None
-    
+
+    import re
+
     for attempt in range(3):
         try:
             chat_completion = client.chat.completions.create(
@@ -37,18 +40,27 @@ def call_llm_with_retry(client: Groq, messages: List[Dict[str, str]], json_mode:
             raw = chat_completion.choices[0].message.content
             if not raw:
                 raise ValueError("Empty response from LLM")
-            
-            # Post-process to strip common HTML tags that agents sometimes hallucinate
-            import re
-            # Aggressively strip any tags that don't look like an auto-link (e.g. <http...>)
+
+            # Strip HTML tags that the model may hallucinate (preserve <https://...> autolinks)
             clean_md = re.sub(r'<(?!https?://)[^>]+>', '', raw)
-            # Remove redundant empty lines and whitespace
             return clean_md.strip()
-        except (RateLimitError, APIStatusError) as e:
+        except APIConnectionError as e:
+            # Network-level failure — always retry with backoff
             if attempt < 2:
-                time.sleep(2 * (attempt + 1)) # Linear backoff
+                time.sleep(2 ** (attempt + 1))
                 continue
-            raise Exception(f"LLM API error (8b model): {e}")
+            raise Exception(f"LLM connection error after retries: {e}")
+        except RateLimitError as e:
+            if attempt < 2:
+                time.sleep(2 ** (attempt + 1))  # Exponential backoff: 2s, 4s
+                continue
+            raise Exception(f"LLM rate-limit exceeded: {e}")
+        except APIStatusError as e:
+            # 4xx/5xx from the API — retry once for transient 5xx, raise for 4xx
+            if e.status_code >= 500 and attempt < 2:
+                time.sleep(2 ** (attempt + 1))
+                continue
+            raise Exception(f"LLM API error ({e.status_code}): {e.message}")
         except (ValueError, AttributeError) as e:
             if attempt == 0:
                 time.sleep(1)
@@ -58,8 +70,8 @@ def call_llm_with_retry(client: Groq, messages: List[Dict[str, str]], json_mode:
             if attempt == 0:
                 time.sleep(1)
                 continue
-            raise Exception(f"Unexpected error: {e}")
-    
+            raise Exception(f"Unexpected LLM error: {e}")
+
     raise Exception("Max retries exceeded")
 
 def functional_requirements_agent(session_id: str, snapshot_id: str, client: Groq = None, additional_context: str = "") -> str:
