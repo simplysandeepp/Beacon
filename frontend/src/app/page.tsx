@@ -463,7 +463,6 @@ function Footer() {
                         {[
                             { label: 'GitHub Repo', href: 'https://github.com/simplysandeepp/Beacon' },
                             { label: 'Contributing', href: 'https://github.com/simplysandeepp/Beacon/blob/main/CONTRIBUTING.md' },
-                            { label: 'Deploy Guide', href: 'https://github.com/simplysandeepp/Beacon/blob/main/DEPLOY-GUIDE.md' },
                             { label: 'Privacy Policy', href: '#' },
                             { label: 'Terms of Use', href: '#' },
                             { label: 'AI Disclaimer', href: '#' },
@@ -497,7 +496,6 @@ function Footer() {
                             >
                                 Sandeep Prajapati
                             </a>
-                            <span className="text-[10px] text-zinc-600">Team Lead</span>
                             <div className="flex items-center gap-2 mt-0.5">
                                 <a href="https://www.sandeepp.in/" target="_blank" rel="noopener noreferrer" className="text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors inline-flex items-center gap-0.5">Portfolio <ExternalLink size={8} /></a>
                                 <span className="text-zinc-700">·</span>
