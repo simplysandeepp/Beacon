@@ -8,7 +8,9 @@ async function apiFetch<T = unknown>(path: string, options?: RequestInit): Promi
     const res = await fetch(joinUrl(BASE, path), options);
     if (!res.ok) {
         const errorText = await res.text().catch(() => "Unknown error");
-        throw new Error(`API error ${res.status}: ${errorText}`);
+        const error = new Error(`API error ${res.status}: ${errorText}`);
+        (error as any).status = res.status;
+        throw error;
     }
 
     if (res.status === 204) {

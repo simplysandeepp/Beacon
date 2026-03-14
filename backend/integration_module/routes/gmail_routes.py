@@ -23,6 +23,9 @@ from brd_module.storage import store_chunks
 from classifier import classify_chunks
 from schema import ClassifiedChunk, SignalLabel
 
+import google.auth.exceptions
+from google.auth.transport.requests import Request
+
 router = APIRouter(prefix="/integrations/gmail", tags=["Gmail Integration"])
 
 # Configuration
@@ -72,10 +75,35 @@ def gmail_login():
     
     authorization_url, state = flow.authorization_url(
         access_type='offline',
-        include_granted_scopes='true'
+        include_granted_scopes='true',
+        prompt='consent'
     )
     
     return RedirectResponse(authorization_url)
+
+def _get_credentials():
+    creds_data = user_credentials.get("main_user")
+    if not creds_data:
+        raise HTTPException(status_code=401, detail="User not authenticated.")
+    
+    creds = Credentials(**creds_data)
+    
+    if not creds.valid:
+        if creds.expired and creds.refresh_token:
+            try:
+                creds.refresh(Request())
+                # Update store
+                user_credentials["main_user"].update({
+                    "token": creds.token,
+                    "refresh_token": creds.refresh_token
+                })
+            except google.auth.exceptions.RefreshError as e:
+                del user_credentials["main_user"]
+                raise HTTPException(status_code=401, detail=f"Session expired: {str(e)}")
+        else:
+            raise HTTPException(status_code=401, detail="Session expired and no refresh token available.")
+            
+    return creds
 
 @router.get("/auth/callback")
 def gmail_oauth_redirect(request: Request):
@@ -145,11 +173,7 @@ def gmail_disconnect():
 
 @router.get("/profile")
 def gmail_profile():
-    creds_data = user_credentials.get("main_user")
-    if not creds_data:
-        raise HTTPException(status_code=401, detail="User not authenticated.")
-    
-    credentials = Credentials(**creds_data)
+    credentials = _get_credentials()
     try:
         from googleapiclient.discovery import build
         service = build('oauth2', 'v2', credentials=credentials)
@@ -164,17 +188,12 @@ def gmail_profile():
 
 @router.get("/labels")
 def gmail_labels():
-    creds_data = user_credentials.get("main_user")
-    if not creds_data:
-        raise HTTPException(status_code=401, detail="User not authenticated.")
-    
-    credentials = Credentials(**creds_data)
+    credentials = _get_credentials()
     try:
         service = gmail.get_gmail_service(credentials)
         results = service.users().labels().list(userId='me').execute()
         labels = results.get('labels', [])
         
-        # Filter for system labels and useful user labels
         system_ids = ['INBOX', 'STARRED', 'SENT', 'DRAFTS', 'SPAM', 'TRASH']
         filtered_labels = []
         for l in labels:
@@ -187,11 +206,7 @@ def gmail_labels():
 
 @router.get("/threads/{thread_id}")
 def gmail_thread_detail(thread_id: str):
-    creds_data = user_credentials.get("main_user")
-    if not creds_data:
-        raise HTTPException(status_code=401, detail="User not authenticated.")
-    
-    credentials = Credentials(**creds_data)
+    credentials = _get_credentials()
     try:
         service = gmail.get_gmail_service(credentials)
         thread = service.users().threads().get(userId='me', id=thread_id, format='full').execute()
@@ -201,11 +216,7 @@ def gmail_thread_detail(thread_id: str):
 
 @router.get("/messages/{message_id}/attachments/{attachment_id}")
 def gmail_attachment(message_id: str, attachment_id: str):
-    creds_data = user_credentials.get("main_user")
-    if not creds_data:
-        raise HTTPException(status_code=401, detail="User not authenticated.")
-    
-    credentials = Credentials(**creds_data)
+    credentials = _get_credentials()
     try:
         service = gmail.get_gmail_service(credentials)
         attachment = service.users().messages().attachments().get(
@@ -224,11 +235,7 @@ def gmail_check(
     content_search: str = Query(default=None),
     has_attachments: bool = Query(default=None)
 ):
-    creds_data = user_credentials.get("main_user")
-    if not creds_data:
-        raise HTTPException(status_code=401, detail="User not authenticated.")
-    
-    credentials = Credentials(**creds_data)
+    credentials = _get_credentials()
     
     # Build search query
     parts = []
@@ -267,14 +274,7 @@ def gmail_check(
 
 @router.post("/ingest")
 def gmail_ingest(body: GmailIngestRequest):
-    creds_data = user_credentials.get("main_user")
-    if not creds_data:
-        raise HTTPException(status_code=401, detail="Gmail is not connected.")
-    
-    if not body.message_ids:
-        raise HTTPException(status_code=400, detail="Select at least one message to ingest.")
-
-    credentials = Credentials(**creds_data)
+    credentials = _get_credentials()
     service = gmail.get_gmail_service(credentials)
     
     chunk_dicts = []

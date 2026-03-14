@@ -72,7 +72,10 @@ export default function GmailReplica({ onClose, onIngest, isIngesting }: GmailRe
             });
             setEmails(prev => append ? [...prev, ...res.emails] : res.emails);
             setNextPageToken(res.next_page_token || null);
-        } catch (e) {
+        } catch (e: any) {
+            if (e.status === 401) {
+                setStatus(prev => prev ? { ...prev, connected: false } : null);
+            }
             setError(e instanceof Error ? e.message : 'Failed to load emails');
         } finally {
             setLoading(false);
@@ -130,7 +133,11 @@ export default function GmailReplica({ onClose, onIngest, isIngesting }: GmailRe
         try {
             const thread = await getGmailThreadFull(id);
             setActiveThread(thread);
-        } catch (e) {
+        } catch (e: any) {
+            if (e.status === 401) {
+                setStatus(prev => prev ? { ...prev, connected: false } : null);
+                setViewMode('list');
+            }
             setError("Failed to load thread details.");
         } finally {
             setThreadLoading(false);
