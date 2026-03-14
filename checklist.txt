@@ -1,0 +1,28 @@
+Both files are written:
+
+README.md (30 KB) — 18 sections including:
+
+Project overview with badge row
+Problem statement + user benefit breakdown (PM / Eng / BA / Team Lead)
+Full user flow — mermaid flowchart TD from open → auth → ingestion → classify → signals → generate → 7 agents → validate → review/edit/lock → export → board sharing
+System architecture — graph TB with subgraphs for Browser, Vercel, Render/Docker, Firebase, DB, Groq
+Frontend architecture — flowchart TD with App Router, Auth Layer, Zustand, API clients
+Backend sequence diagram — full ingestion → classification → BRD generation → export flow
+AI classification engine — two-phase mermaid flowchart (heuristics + LLM batch)
+Multi-agent BRD pipeline — parallel orchestrator with lock behavior
+ER diagram — 4 AKS tables + Firestore collection tree
+Full API reference tables, route map, tech stack, repo structure, local dev setup, env vars
+
+
+DEPLOY-GUIDE.md (16 KB) — 10 parts including:
+
+
+Render backend — Docker Web Service setup, all 14 env vars with exact descriptions
+Vercel frontend — root directory config, all 10 env vars, FIREBASE_ADMIN_PRIVATE_KEY formatting note
+Firebase setup — Auth + Firestore enable, client config extraction, service account key generation
+Slack OAuth — app creation, redirect URL, Bot Token Scopes, credential copy
+Groq API key — console steps, free tier note
+Database options — Render Postgres (split URL guide), Supabase, Neon, SQLite fallback caveat
+Cross-service wiring — which vars to set after both services are live
+Smoke test checklist — 10 steps from login through DOCX export
+Troubleshooting — 7 common issues with fixes

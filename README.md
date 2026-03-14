@@ -1,723 +1,872 @@
-# Beacon
+<div align="center">
 
-Comprehensive root-level documentation for the full Beacon project.
+# 🔦 Beacon
 
-Beacon is an AI-assisted Business Requirements Document platform that converts scattered project conversations and documents into structured BRD drafts with review and export workflows.
+### AI-Powered Business Requirements Document Platform
 
-## Live Link
+**Convert scattered Slack threads, emails, meeting notes, and uploaded files into structured, export-ready BRDs — automatically.**
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://brd-agent-xi.vercel.app/)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/simplysandeepp/Beacon)
-[![Contributing Guide](https://img.shields.io/badge/Contributing-Guide-0A66C2?style=for-the-badge&logo=readthedocs&logoColor=white)](CONTRIBUTING.md)
+[![Deploy Guide](https://img.shields.io/badge/Deploy%20Guide-Read%20Now-0A66C2?style=for-the-badge&logo=readthedocs&logoColor=white)](DEPLOY-GUIDE.md)
+[![Contributing](https://img.shields.io/badge/Contributing-Guide-6C63FF?style=for-the-badge)](CONTRIBUTING.md)
 
-## Technology Stack Buttons
+---
 
-![Next.js](https://img.shields.io/badge/Next.js-14-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
-![React](https://img.shields.io/badge/React-18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
-![Zustand](https://img.shields.io/badge/Zustand-State%20Management-7F5AF0?style=for-the-badge)
-![Framer Motion](https://img.shields.io/badge/Framer_Motion-Animation-0055FF?style=for-the-badge&logo=framer&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![Groq](https://img.shields.io/badge/Groq-LLM-F55036?style=for-the-badge)
-![Firebase](https://img.shields.io/badge/Firebase-Auth%20%26%20Firestore-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
-![Vercel](https://img.shields.io/badge/Vercel-Deployment-000000?style=for-the-badge&logo=vercel&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-14-000000?style=flat-square&logo=nextdotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?style=flat-square&logo=fastapi&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?style=flat-square&logo=python&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq-LLM%20Engine-F55036?style=flat-square)
+![Firebase](https://img.shields.io/badge/Firebase-Auth%20%26%20Firestore-FFCA28?style=flat-square&logo=firebase&logoColor=black)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-AKS%20Database-4169E1?style=flat-square&logo=postgresql&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
 
-## Quick Links
+</div>
 
-- Live app: https://brd-agent-xi.vercel.app/
-- Repository: https://github.com/simplysandeepp/Beacon
-- Contributing guide: [CONTRIBUTING.md](CONTRIBUTING.md)
-- Frontend README: [frontend/README.md](frontend/README.md)
-- Backend setup reference: [backend/SETUP.md](backend/SETUP.md)
-- BRD module API notes: [backend/brd_module/API.md](backend/brd_module/API.md)
+---
 
-## Team
+## Table of Contents
 
-| Name | Role | GitHub ID |
-| --- | --- | --- |
-| Sandeep Prajapati | Team Member | [@simplysandeepp](https://github.com/simplysandeepp) |
-| Kurian Jose | Team Member | [@KurianJose7586](https://github.com/KurianJose7586/) |
-| Preet Biswas | Team Member | [@preetbiswas12](https://github.com/preetbiswas12) |
-| Aryan Singh | Team Member | [@DevAryanSin](https://github.com/DevAryanSin) |
+1. [What is Beacon?](#1-what-is-beacon)
+2. [The Problem It Solves](#2-the-problem-it-solves)
+3. [How Users Benefit](#3-how-users-benefit)
+4. [Complete User Flow](#4-complete-user-flow)
+5. [System Architecture](#5-system-architecture)
+6. [Frontend Architecture](#6-frontend-architecture)
+7. [Backend Processing Pipeline](#7-backend-processing-pipeline)
+8. [AI Classification Engine](#8-ai-classification-engine)
+9. [Multi-Agent BRD Generation](#9-multi-agent-brd-generation)
+10. [Database & Persistence Model](#10-database--persistence-model)
+11. [API Reference](#11-api-reference)
+12. [Frontend Route Map](#12-frontend-route-map)
+13. [Tech Stack](#13-tech-stack)
+14. [Repository Structure](#14-repository-structure)
+15. [Local Development Setup](#15-local-development-setup)
+16. [Environment Variables](#16-environment-variables)
+17. [Deployment](#17-deployment)
+18. [Team](#18-team)
 
-## Table Of Contents
+---
 
-1. [Project Summary](#project-summary)
-2. [What Problem Beacon Solves](#what-problem-beacon-solves)
-3. [Core Capabilities](#core-capabilities)
-4. [User Flow](#user-flow)
-5. [Architecture Flow](#architecture-flow)
-6. [Detailed Processing Pipeline](#detailed-processing-pipeline)
-7. [Data Model And Persistence](#data-model-and-persistence)
-8. [Backend API Reference](#backend-api-reference)
-9. [Integration Module Endpoints](#integration-module-endpoints)
-10. [Frontend Route Map](#frontend-route-map)
-11. [Tech Stack](#tech-stack)
-12. [Repository Structure](#repository-structure)
-13. [Local Setup And Run](#local-setup-and-run)
-14. [Environment Variables](#environment-variables)
-15. [Deployment Notes](#deployment-notes)
-16. [Contributing](#contributing)
-17. [Testing](#testing)
-18. [Known Gaps And Practical Notes](#known-gaps-and-practical-notes)
-19. [Screenshots Gallery](#screenshots-gallery)
-20. [Social Handles](#social-handle)
+## 1. What is Beacon?
 
-## Project Summary
+Beacon is a **full-stack AI platform** that automates Business Requirements Document creation. It ingests raw project data from multiple sources, intelligently filters noise, extracts meaningful signals, and runs a multi-agent LLM pipeline to produce a structured, professional BRD — all reviewable and exportable from a modern web UI.
 
-Beacon is a full-stack application with:
+**Core modules:**
 
-- A Next.js frontend for authentication, session management, source ingestion, signal review, BRD drafting, collaboration, and export.
-- A FastAPI backend for ingestion endpoints, chunk review, BRD generation, validation, and export.
-- A noise-filter engine that combines heuristics and LLM classification.
-- A multi-agent BRD generation pipeline that writes sectioned output and validation flags.
-- Firestore-based collaboration objects (boards, members, invite links) for team sharing.
+| Module | Responsibility |
+|---|---|
+| `frontend/` | Next.js 14 app — auth, sessions, ingestion UI, BRD review, collaboration, export |
+| `backend/api/` | FastAPI server — REST endpoints, orchestration, streaming |
+| `backend/Noise filter module/` | Two-phase classifier — heuristics + Groq LLM batch |
+| `backend/brd_module/` | Multi-agent BRD pipeline, validator, exporter, HITL versioning |
+| `backend/Integration Module/` | Slack OAuth + Gmail connectors |
 
-## What Problem Beacon Solves
+---
 
-Teams usually capture requirements in multiple places:
+## 2. The Problem It Solves
 
-- Slack threads
-- Email conversations
-- Meeting notes
-- Uploaded files
+Modern product teams scatter requirements across multiple channels:
 
-This creates issues:
+```
+Slack threads  ──┐
+Email chains   ──┤
+Meeting notes  ──┼──→  🔥 Requirements Lost,
+File uploads   ──┤       Contradicted, or Forgotten
+Verbal calls   ──┘
+```
 
-- Important decisions are hard to trace.
-- Requirements conflict across sources.
-- BRD writing is slow and repetitive.
-- Ownership and review state become unclear.
+**Without Beacon:**
+- BRD writing takes days of manual synthesis
+- Critical decisions buried in thread history
+- Conflicting requirements go undetected until late in development
+- Traceability to the original source is lost
+- Team collaboration on requirements is disjointed
 
-Beacon addresses this through a defined pipeline:
+**With Beacon:**
+- Raw data ingested in minutes
+- Noise automatically suppressed (system alerts, scheduling, chatter)
+- Every signal traced back to its source + speaker
+- Seven BRD sections generated in parallel by specialized AI agents
+- Contradictions and gaps flagged before hand-off
+- Exported in `.md`, `.html`, or `.docx` for any stakeholder
 
-1. Ingest source data.
-2. Classify and suppress noise transparently.
-3. Store attributed signals.
-4. Generate multi-section BRD drafts.
-5. Validate contradictions/gaps.
-6. Enable human edits and export.
-7. Support collaborative board sharing.
+---
 
-## Core Capabilities
+## 3. How Users Benefit
 
-### Product Features
+### Product Managers
+- Stop spending hours writing requirements from scratch
+- Get a structured first draft in under 10 minutes after ingestion
+- Share the board with stakeholders using invite links
+- Lock sections once reviewed so edits do not overwrite approved content
 
-- Authenticated workspace with protected routes.
-- Session-oriented workflow for BRD runs.
-- Source ingestion from uploaded files and demo dataset.
-- Signal review with active/suppressed states and restore action.
-- BRD generation across seven sections.
-- Validation flag surfacing.
-- Human section editing and lock behavior.
-- Export in Markdown, HTML, and DOCX from backend.
-- Share links and role-based board access via invites.
+### Engineering Teams
+- Functional requirements are extracted and deduplicated automatically
+- Timeline references are identified from message history
+- Contradiction flags warn when decisions conflict with requirements before sprint planning
 
-### BRD Section Coverage
+### Business Analysts
+- Human-in-the-loop editing lets you refine AI output section by section
+- Validation flags call out gaps ("Insufficient data — requires stakeholder clarification")
+- Export polished DOCX for formal hand-off to clients
 
-Current generation pipeline produces:
+### Team Leads
+- Role-based board sharing — invite teammates as Viewer or Editor
+- Session history preserves all ingestion runs and BRD versions
+- Versioned section ledger tracks every human edit
 
-1. Executive Summary
-2. Functional Requirements
-3. Stakeholder Analysis
-4. Timeline
-5. Decisions
-6. Assumptions
-7. Success Metrics
+---
 
-## User Flow
-
-### Step-By-Step Journey
-
-1. User opens the app and signs up/logs in.
-2. Frontend creates a middleware session cookie (`firebase-session`) and loads user boards/sessions.
-3. User creates or selects a BRD session.
-4. User ingests data using file upload or demo ingestion.
-5. Backend classifies chunks and stores active/suppressed entries.
-6. User reviews signals and optionally restores suppressed items.
-7. User triggers BRD generation.
-8. Backend snapshots current signals, runs section agents, validates output.
-9. User reviews section cards, validation flags, and edits content if needed.
-10. User exports BRD (`.md`, `.html`, `.docx`) and can share board access with teammates.
-
-### User Flow Diagram
+## 4. Complete User Flow
 
 ```mermaid
 flowchart TD
-    A[Landing] --> B[Register/Login]
-    B --> C[Dashboard]
-    C --> D[Create or Select Session]
-    D --> E[Ingestion]
-    E --> F[Signal Review]
-    F --> G[Generate BRD]
-    G --> H[Review Sections + Flags]
-    H --> I[Edit/Lock Sections]
-    I --> J[Export]
-    H --> K[Share Board]
+    A([Open Beacon]) --> B{Have Account?}
+    B -- No --> C[Register with Email]
+    B -- Yes --> D[Login]
+    C --> E[Firebase Auth Creates User]
+    D --> E
+    E --> F[Session Cookie Set\nfirebase-session]
+    F --> G([Dashboard Loads])
+    G --> H{Existing BRD Session?}
+    H -- Yes --> I[Select Session]
+    H -- No --> J[Create New Session\nPOST /sessions/]
+    I --> K([Ingestion Page])
+    J --> K
+    K --> L{Source Type}
+    L -- File Upload --> M[Upload .txt / .csv / .docx\nPOST /ingest/upload]
+    L -- Demo Dataset --> N[Run Enron Email Demo\nPOST /ingest/demo Streaming]
+    L -- Slack --> O[Connect Slack OAuth\nGET /integrations/slack/auth/start]
+    L -- Manual JSON --> P[POST /ingest/data]
+    M --> Q[Backend: Classify Chunks\nHeuristics + LLM]
+    N --> Q
+    O --> R[Select Channels] --> S[Ingest Messages\nPOST /ingest] --> Q
+    P --> Q
+    Q --> T[Chunks Stored in AKS\nclassified_chunks table]
+    T --> U([Signals Page])
+    U --> V[Review Active Signals]
+    U --> W[Review Suppressed Noise]
+    W --> X{Restore?}
+    X -- Yes --> Y[POST /chunks/id/restore]
+    Y --> V
+    V --> Z([Generate BRD])
+    Z --> AA[POST /brd/generate]
+    AA --> AB[Snapshot Created]
+    AB --> AC[7 Agents Run in Parallel\nThreadPoolExecutor]
+    AC --> AD[Sections Stored in DB]
+    AD --> AE[Validator Runs\nGap + Contradiction Check]
+    AE --> AF([BRD Review Page])
+    AF --> AG[Read Section Cards]
+    AF --> AH[Review Validation Flags]
+    AH --> AI{Flag Type}
+    AI -- Gap --> AJ[Section needs more data]
+    AI -- Contradiction --> AK[Conflict between req and decision]
+    AG --> AL{Edit Section?}
+    AL -- Yes --> AM[PUT /brd/sections/name\nHuman Edit Stored]
+    AL -- Lock --> AN[Section locked for future re-runs]
+    AF --> AO([Export Page])
+    AO --> AP{Format}
+    AP -- Markdown --> AQ[.md File Download]
+    AP -- HTML --> AR[Styled .html Download]
+    AP -- DOCX --> AS[.docx Word Document]
+    AF --> AT([Share Board])
+    AT --> AU[Firestore: Create Invite Token]
+    AU --> AV[Share Link Sent to Teammate]
+    AV --> AW[Teammate Joins as Viewer/Editor]
 ```
 
-## Architecture Flow
+---
 
-### High-Level Architecture
+## 5. System Architecture
+
+### High-Level Component Map
 
 ```mermaid
-flowchart LR
-    U[User Browser]
-    FE[Next.js Frontend]
-    API[FastAPI Backend]
-    NF[Noise Filter Module]
-    BRD[BRD Multi-Agent Module]
-    DB[(PostgreSQL or SQLite Fallback)]
-    FS[(Firebase Firestore)]
+graph TB
+    subgraph Browser["User Browser"]
+        UI[Next.js 14 App]
+    end
 
-    U --> FE
+    subgraph Vercel["Vercel Edge Network"]
+        FE[Next.js Frontend\nApp Router + API Routes]
+        MW[Middleware\nRoute Protection]
+    end
+
+    subgraph Render["Render / Docker Container"]
+        API[FastAPI Server\nuvicorn port 8000]
+        NF[Noise Filter Module\nclassifier.py]
+        BRD_MOD[BRD Module\nbrd_pipeline.py]
+        VAL[Validator\nvalidator.py]
+        EXP[Exporter\nexporter.py]
+        HITL[HITL Ledger\nversioned_ledger.py]
+        SLACK[Slack Integration\nOAuth router]
+    end
+
+    subgraph Firebase["Firebase"]
+        AUTH[Firebase Auth\nEmail + Session Cookies]
+        FS[(Firestore\nBoards / Members / Invites)]
+    end
+
+    subgraph DB["Database"]
+        PG[(PostgreSQL\nPrimary AKS Store)]
+        SQ[(SQLite\nLocal Fallback)]
+    end
+
+    subgraph LLM["Groq Cloud"]
+        GROQ[llama-3.1-8b-instant\nClassification + Generation]
+    end
+
+    UI --> FE
+    FE --> MW
+    MW --> AUTH
     FE --> API
-    API --> NF
-    API --> BRD
-    NF --> DB
-    BRD --> DB
     FE --> FS
+    API --> NF
+    API --> BRD_MOD
+    API --> SLACK
+    BRD_MOD --> VAL
+    BRD_MOD --> EXP
+    BRD_MOD --> HITL
+    NF --> GROQ
+    BRD_MOD --> GROQ
+    NF --> PG
+    NF --> SQ
+    BRD_MOD --> PG
+    BRD_MOD --> SQ
 ```
 
 ### Runtime Responsibility Split
 
-- `frontend/` handles UI, route protection, auth UX, state management, collaboration UX.
-- `backend/` handles classification orchestration, BRD generation, validation, and exports.
-- Firestore handles board membership and invite workflows.
-- AKS data (chunks/snapshots/sections/flags) is persisted in PostgreSQL or SQLite fallback.
+| Layer | What It Owns |
+|---|---|
+| **Next.js Frontend** | UI rendering, authenticated routing, state management, collaboration UX |
+| **Next.js API Routes** | Firebase session cookie management, server-only Firebase Admin calls |
+| **FastAPI Backend** | All data processing, classification, generation, validation, export |
+| **Firebase Auth** | User identity, JWT tokens, session cookies |
+| **Firebase Firestore** | Board objects, member roles, invite tokens |
+| **PostgreSQL / SQLite** | All AKS data — chunks, snapshots, sections, validation flags |
+| **Groq LLM** | Email/text classification and all 7 BRD section agents |
 
-### Frontend Architecture Flow
+---
+
+## 6. Frontend Architecture
 
 ```mermaid
 flowchart TD
-    A[App Router Pages] --> B[AuthContext + Firebase Auth]
-    B --> C[Session Cookie API Route]
-    A --> D[Zustand Stores]
-    D --> E[apiClient.ts]
-    E --> F[FastAPI Endpoints]
-    D --> G[Firestore Boards/Sharing]
+    subgraph Router["Next.js App Router"]
+        LP["/ Landing Page"]
+        LG["/login"]
+        RG["/register"]
+        DB["/dashboard"]
+        IG["/ingestion"]
+        SG["/signals"]
+        BRD_P["/brd — BRD Editor"]
+        EX["/export"]
+        PF["/profile — Integrations"]
+        INV["/invite/token — Board Join"]
+    end
+
+    subgraph Auth["Auth Layer"]
+        AC[AuthContext\nFirebase Auth state]
+        MC[middleware.ts\nRoute guard via session cookie]
+        SR["/api/auth/session\nSet + Clear cookie"]
+    end
+
+    subgraph State["Zustand State Management"]
+        BS[useBRDStore\nSections, flags, session_id]
+    end
+
+    subgraph Clients["External Clients"]
+        AC2[apiClient.ts\nAll FastAPI calls]
+        FC[Firestore SDK\nBoards, members, invites]
+    end
+
+    LP --> LG
+    LP --> RG
+    LG --> SR
+    RG --> SR
+    SR --> AC
+    AC --> MC
+    MC -->|Authenticated| DB
+    DB --> IG
+    DB --> SG
+    DB --> BRD_P
+    BRD_P --> EX
+    DB --> PF
+    BS --> AC2
+    BS --> FC
+    DB --> BS
+    IG --> BS
+    SG --> BS
+    BRD_P --> BS
 ```
 
-### Backend Request Flow
+### Key Frontend Files
+
+| File | Purpose |
+|---|---|
+| `src/middleware.ts` | Cookie-based route protection for all protected pages |
+| `src/lib/firebase.ts` | Firebase client SDK initialisation |
+| `src/lib/firebaseAdmin.ts` | Server-only Firebase Admin SDK (API routes only) |
+| `src/lib/apiClient.ts` | Typed fetch wrappers for every FastAPI endpoint |
+| `src/contexts/AuthContext.tsx` | Global Firebase auth state provider |
+| `src/store/useBRDStore.ts` | Zustand store — session, sections, chunks, flags |
+| `src/components/workspace/AgentOrchestrator.tsx` | BRD generation UI + SSE stream consumer |
+| `src/components/workspace/IngestionPanel.tsx` | File upload, demo ingest, log stream |
+| `src/components/workspace/BRDEditor.tsx` | Section cards, human editing, lock control |
+
+---
+
+## 7. Backend Processing Pipeline
 
 ```mermaid
 sequenceDiagram
-    participant UI as Frontend
+    participant UI as Next.js Frontend
     participant API as FastAPI
     participant NF as Noise Filter
     participant BRD as BRD Pipeline
-    participant DB as AKS DB
+    participant VAL as Validator
+    participant DB as AKS Database
+    participant LLM as Groq LLM
 
-    UI->>API: POST /sessions/{id}/ingest/upload
-    API->>NF: classify_chunks(...)
-    NF->>DB: store_chunks(...)
-    UI->>API: POST /sessions/{id}/brd/generate
-    API->>BRD: run_brd_generation(...)
-    BRD->>DB: create_snapshot + store sections
-    API->>DB: validate_brd flags
-    UI->>API: GET /sessions/{id}/brd/
-    API-->>UI: sections + flags
+    Note over UI,DB: INGESTION
+    UI->>API: POST /sessions/
+    API-->>UI: session_id uuid
+
+    UI->>API: POST /sessions/id/ingest/upload
+    API->>NF: classify_chunks(chunk_dicts)
+    NF->>NF: Phase 1 Heuristic + Domain Gate (8 threads)
+    NF->>LLM: Phase 2 Batch classify (batch=10, 2 concurrent)
+    LLM-->>NF: labels + confidence + reasoning
+    NF->>DB: store_chunks(classified)
+    API-->>UI: chunk_count
+
+    Note over UI,DB: SIGNAL REVIEW
+    UI->>API: GET /sessions/id/chunks
+    API->>DB: get_active_signals(session_id)
+    DB-->>API: active chunk list
+    API-->>UI: chunks + count
+
+    UI->>API: POST /sessions/id/chunks/chunk_id/restore
+    API->>DB: restore_noise_item(chunk_id)
+    API-->>UI: restored message
+
+    Note over UI,DB: BRD GENERATION
+    UI->>API: POST /sessions/id/brd/generate
+    API->>BRD: run_brd_generation(session_id)
+    BRD->>DB: create_snapshot with active chunk_ids
+    BRD->>LLM: 6 section agents in parallel (ThreadPoolExecutor)
+    LLM-->>BRD: section content x6
+    BRD->>LLM: executive_summary agent (after others complete)
+    LLM-->>BRD: executive summary
+    BRD->>DB: store_brd_section x7
+    API->>VAL: validate_brd(session_id)
+    VAL->>LLM: Semantic contradiction check (req vs decisions)
+    LLM-->>VAL: has_contradiction + description
+    VAL->>DB: store_validation_flag xN
+    API-->>UI: snapshot_id + completed
+
+    Note over UI,DB: EXPORT
+    UI->>API: GET /sessions/id/brd/export?format=docx
+    API->>DB: get_latest_brd_sections
+    API->>API: compile and render
+    API-->>UI: file bytes attachment
 ```
 
-### Provided Flowchart Diagrams
-
-#### Multi-Agent Pipeline Flowchart
-
-![multiagent-flowchar](frontend/assets/multiagent-flowchar.jpeg)
-
-#### Website Architecture Flowchart
-
-![website_architectural-flowchart](frontend/assets/website_architectural-flowchart.jpeg)
-
-## Detailed Processing Pipeline
-
-### 1) Session Creation
-
-- Endpoint: `POST /sessions/`
-- Returns UUID `session_id`.
-- Session ID is the correlation key for chunks, snapshots, and BRD outputs.
-
-### 2) Ingestion
-
-- JSON ingestion endpoint: `POST /sessions/{session_id}/ingest/data`
-- File upload endpoint: `POST /sessions/{session_id}/ingest/upload`
-- Demo dataset endpoint: `POST /sessions/{session_id}/ingest/demo`
-
-Notes:
-
-- Upload endpoint currently supports demo mode behavior that copies pre-classified cache when available.
-- Demo endpoint supports streaming style logs on backend.
-
-### 3) Noise Filtering And Signal Extraction
-
-Classification path in `backend/Noise filter module/classifier.py`:
-
-1. Heuristic pass (regex and pattern rules)
-2. Domain gate
-3. LLM batch classification for unresolved chunks
-
-Confidence handling (current code path):
-
-- `>= 0.90`: auto-accept
-- `0.70 to 0.89`: accept but flag for review
-- `< 0.70`: force to noise and flag for review
-
-Labels:
-
-- `requirement`
-- `decision`
-- `stakeholder_feedback`
-- `timeline_reference`
-- `noise`
-
-### 4) Attributed Knowledge Store (AKS)
-
-Stored entities include:
-
-- classified chunks
-- snapshots of chunk IDs for frozen generation context
-- BRD section versions
-- validation flags
-
-### 5) BRD Generation Pipeline
-
-Orchestrator: `backend/brd_module/brd_pipeline.py`
-
-Flow:
-
-1. Create snapshot of current active signals.
-2. Run six section agents in parallel worker pool.
-3. Run executive summary agent after other sections.
-4. Store each section as a versioned entry.
-5. Trigger validation.
-
-### 6) Validation
-
-Validator: `backend/brd_module/validator.py`
-
-Checks:
-
-- Rule-based gap detection for sections with "Insufficient data".
-- AI semantic contradiction check between requirements and decisions.
-
-Flags stored in `brd_validation_flags` with severity.
-
-### 7) Human-In-The-Loop Editing
-
-- Section edit endpoint: `PUT /sessions/{session_id}/brd/sections/{section_name}`
-- Ad-hoc prompt endpoint: `POST /sessions/{session_id}/hitl/prompt`
-- Version ledger helpers in `backend/brd_module/hitl/versioned_ledger.py`
-
-### 8) Export
-
-Endpoint: `GET /sessions/{session_id}/brd/export?format=...`
-
-Supported formats:
-
-- `markdown`
-- `html`
-- `docx`
-
-Internals:
-
-- Markdown compilation from latest sections.
-- HTML uses markdown-to-html conversion plus embedded styles.
-- DOCX uses template fill if `brd.docx` exists, otherwise generates from scratch.
-
-## Data Model And Persistence
-
-### Backend AKS Tables (Created In `storage.py`)
-
-- `classified_chunks`
-- `brd_snapshots`
-- `brd_sections`
-- `brd_validation_flags`
-
-### Frontend Collaboration Data (Firestore)
-
-Collections/subcollections used by frontend:
-
-- `boards/{boardId}`
-- `boards/{boardId}/members/{uid}`
-- `users/{uid}/boards/{boardId}`
-- `invites/{token}`
-
-### Persistence Strategy Summary
-
-- BRD processing data: PostgreSQL by default, SQLite fallback.
-- User auth and collaboration metadata: Firebase Auth + Firestore.
-
-## Backend API Reference
-
-Base: FastAPI app in `backend/api/main.py`
-
-### Session Endpoints
-
-| Method | Path | Purpose |
-| --- | --- | --- |
-| POST | `/sessions/` | Create new session ID |
-| GET | `/sessions/{session_id}` | Get session status |
-
-### Ingestion Endpoints
-
-| Method | Path | Purpose |
-| --- | --- | --- |
-| POST | `/sessions/{session_id}/ingest/data` | Ingest raw JSON chunks |
-| POST | `/sessions/{session_id}/ingest/upload` | Upload and process file |
-| POST | `/sessions/{session_id}/ingest/demo` | Demo ingestion from dataset |
-
-### Review Endpoints
-
-| Method | Path | Purpose |
-| --- | --- | --- |
-| GET | `/sessions/{session_id}/chunks/?status=signal|noise|all` | List chunks by state |
-| POST | `/sessions/{session_id}/chunks/{chunk_id}/restore` | Restore suppressed chunk |
-
-### BRD Endpoints
-
-| Method | Path | Purpose |
-| --- | --- | --- |
-| POST | `/sessions/{session_id}/brd/generate` | Generate BRD + validation |
-| GET | `/sessions/{session_id}/brd/?format=markdown|html` | Fetch sections + flags |
-| PUT | `/sessions/{session_id}/brd/sections/{section_name}` | Save human-edited section |
-| GET | `/sessions/{session_id}/brd/export?format=markdown|html|docx` | Download compiled BRD |
-
-### HITL Endpoints
-
-| Method | Path | Purpose |
-| --- | --- | --- |
-| POST | `/sessions/{session_id}/hitl/prompt` | Parse/apply natural-language edit |
-| GET | `/sessions/{session_id}/hitl/status` | HITL status |
-| POST | `/sessions/{session_id}/hitl/start` | Start HITL round (stub) |
-| GET | `/sessions/{session_id}/hitl/questions` | Retrieve questions (stub) |
-| POST | `/sessions/{session_id}/hitl/answers` | Submit answers (stub) |
-| PUT | `/sessions/{session_id}/hitl/requirements` | Requirement edit endpoint (stub) |
-
-## Integration Module Endpoints
-
-Integration module app is in `backend/Integration Module/`.
-
-### Gmail Routes
-
-- `GET /gmail/login`
-- `GET /gmail/oauth_redirect`
-- `GET /gmail/check`
-- `GET /gmail/search`
-- `GET /gmail/download/{message_id}/{attachment_id}`
-- `GET /gmail/extract_batch`
-- `POST /gmail/process_selected`
-
-### Slack Routes
-
-- `GET /slack/login`
-- `GET /slack/oauth_redirect`
-- `GET /slack/messages`
-- `GET /slack/channels`
-- `GET /slack/post`
-- `POST /slack/process_selected`
-
-### PDF Route
-
-- `POST /pdf/parse`
-
-## Frontend Route Map
-
-Primary app pages in `frontend/src/app/`:
-
-- `/` - Landing page
-- `/login` - Login
-- `/register` - Registration
-- `/forgot-password` - Password reset
-- `/dashboard` - Session dashboard
-- `/ingestion` - Source ingestion UI
-- `/signals` - Signal review
-- `/brd` - BRD section review and generation
-- `/brd/new` - New BRD flow
-- `/editor` - Alternate BRD editor UI
-- `/export` - Export page
-- `/settings` - Settings and session management
-- `/profile` - Profile and integration controls
-- `/analytics/conflicts` - Conflict analytics view
-- `/analytics/traceability` - Traceability matrix view
-- `/analytics/sentiment` - Sentiment analytics view
-- `/agents` - Agent page
-- `/templates` - Template page
-- `/project/new` - New project page
-- `/project/[id]` - Project workspace tabs
-- `/invite/[token]` - Shared board invite acceptance
-
-## Tech Stack
+---
+
+## 8. AI Classification Engine
+
+The noise filter runs a two-phase parallel pipeline before any chunk reaches the AKS.
+
+```mermaid
+flowchart TD
+    IN[Raw Text Chunks from ingestion] --> H1
+
+    subgraph Phase1["Phase 1 — Heuristic Gate (8 threads, CPU-bound)"]
+        H1{System mail?\nOut-of-office?\nMeeting invite?}
+        H1 -- Match --> NS[Label NOISE\nConfidence 1.0\nSkip LLM]
+        H1 -- No match --> DG{Domain Gate\nProject keywords?}
+        DG -- timeline or decision keywords --> DL[Pre-label candidate]
+        DG -- no signal keywords --> UN[Unresolved — LLM queue]
+    end
+
+    subgraph Phase2["Phase 2 — LLM Batch (batch=10, 2 concurrent)"]
+        UN --> BP[Build classification prompt]
+        DL --> BP
+        BP --> GQ[Groq API\nllama-3.1-8b-instant]
+        GQ --> PR[Parse JSON response\nlabel + confidence + reasoning]
+        PR --> CV{Confidence}
+        CV -- ">= 0.90" --> AA[Auto-accept\nflagged_for_review false]
+        CV -- "0.70 – 0.89" --> AF[Accept and flag for review]
+        CV -- "< 0.70" --> FN[Force NOISE\nflagged_for_review true]
+    end
+
+    NS --> OUT[ClassifiedChunk objects]
+    AA --> OUT
+    AF --> OUT
+    FN --> OUT
+    OUT --> DB[(AKS classified_chunks)]
+```
+
+**Signal Labels:**
+
+| Label | Meaning |
+|---|---|
+| `requirement` | Functional or non-functional product requirement |
+| `decision` | Architectural or product decision made |
+| `stakeholder_feedback` | Explicit feedback or request from a stakeholder |
+| `timeline_reference` | Deadline, milestone, or phase reference |
+| `noise` | System email, scheduling, chatter, irrelevant content |
+
+---
+
+## 9. Multi-Agent BRD Generation
+
+```mermaid
+flowchart LR
+    SN[Snapshot Created\nchunk_ids frozen] --> OR
+
+    subgraph OR["Orchestrator — ThreadPoolExecutor (6 parallel workers)"]
+        A1[functional_requirements_agent]
+        A2[stakeholder_analysis_agent]
+        A3[timeline_agent]
+        A4[decisions_agent]
+        A5[assumptions_agent]
+        A6[success_metrics_agent]
+    end
+
+    OR -->|All 6 complete| A7[executive_summary_agent\nreads all 6 sections]
+
+    A1 --> DB[(brd_sections)]
+    A2 --> DB
+    A3 --> DB
+    A4 --> DB
+    A5 --> DB
+    A6 --> DB
+    A7 --> DB
+
+    DB --> VL[validator.py\nGap + Contradiction check]
+    VL --> FL[(brd_validation_flags)]
+
+    DB --> EX[exporter.py]
+    EX --> MD[.md export]
+    EX --> HTML[.html export]
+    EX --> DOCX[.docx export]
+```
+
+**Section agents and their signal inputs:**
+
+| Agent | Signal Labels Consumed |
+|---|---|
+| Functional Requirements | `requirement` |
+| Stakeholder Analysis | `stakeholder_feedback`, `requirement` |
+| Timeline | `timeline_reference`, `decision` |
+| Decisions | `decision` |
+| Assumptions | all labels |
+| Success Metrics | `requirement`, `stakeholder_feedback` |
+| Executive Summary | output of all 6 other sections |
+
+> **Lock behavior:** If a section has been human-edited and locked via `PUT /brd/sections/{name}`, the agent skips re-generation and returns the locked content — preserving approved decisions across re-runs.
+
+---
+
+## 10. Database & Persistence Model
+
+```mermaid
+erDiagram
+    classified_chunks {
+        UUID chunk_id PK
+        VARCHAR session_id
+        VARCHAR source_ref
+        VARCHAR label
+        BOOLEAN suppressed
+        BOOLEAN manually_restored
+        BOOLEAN flagged_for_review
+        TIMESTAMP created_at
+        JSONB data
+    }
+
+    brd_snapshots {
+        UUID snapshot_id PK
+        VARCHAR session_id
+        TIMESTAMP created_at
+        JSONB chunk_ids
+    }
+
+    brd_sections {
+        UUID section_id PK
+        VARCHAR session_id
+        UUID snapshot_id FK
+        VARCHAR section_name
+        INTEGER version_number
+        TEXT content
+        JSONB source_chunk_ids
+        BOOLEAN is_locked
+        BOOLEAN human_edited
+        TIMESTAMP generated_at
+        JSONB data
+    }
+
+    brd_validation_flags {
+        UUID flag_id PK
+        VARCHAR session_id
+        VARCHAR section_name
+        VARCHAR flag_type
+        TEXT description
+        VARCHAR severity
+        BOOLEAN auto_resolvable
+        TIMESTAMP created_at
+    }
+
+    brd_snapshots ||--o{ brd_sections : "snapshot_id"
+    classified_chunks }o--o{ brd_snapshots : "included in chunk_ids"
+    brd_sections ||--o{ brd_validation_flags : "flagged per section"
+```
+
+**Firestore collections (frontend collaboration):**
+
+```
+boards/{boardId}
+  └── members/{uid}          ← role: owner | editor | viewer
+users/{uid}
+  └── boards/{boardId}       ← reverse index for dashboard listing
+invites/{token}              ← boardId + role + expiry (24h TTL)
+```
+
+---
+
+## 11. API Reference
+
+### Sessions
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/sessions/` | Create a new BRD session, returns `session_id` |
+| `GET` | `/sessions/{id}` | Get session status |
+
+### Ingestion
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/sessions/{id}/ingest/data` | Ingest raw JSON chunks |
+| `POST` | `/sessions/{id}/ingest/upload` | Upload a file |
+| `POST` | `/sessions/{id}/ingest/demo?limit=80` | Stream-ingest Enron email demo dataset |
+
+### Signal Review
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/sessions/{id}/chunks?status=signal\|noise\|all` | List classified chunks |
+| `POST` | `/sessions/{id}/chunks/{chunk_id}/restore` | Restore suppressed chunk to active |
+
+### BRD Generation
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/sessions/{id}/brd/generate` | Synchronous generation — returns when all 7 sections stored |
+| `GET` | `/sessions/{id}/brd/generate/stream` | SSE streaming with real-time agent progress |
+| `GET` | `/sessions/{id}/brd/` | Get latest BRD sections + meta + validation flags |
+| `PUT` | `/sessions/{id}/brd/sections/{section_name}` | Update or lock a section with human content |
+| `GET` | `/sessions/{id}/brd/export?format=markdown\|html\|docx` | Download BRD in chosen format |
+
+### HITL
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/sessions/{id}/hitl/prompt` | Submit ad-hoc prompt to refine a section |
+
+### Slack Integration
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/integrations/slack/auth/start` | Start Slack OAuth flow |
+| `GET` | `/integrations/slack/auth/callback` | OAuth callback redirect from Slack |
+| `GET` | `/integrations/slack/status` | Check connection status |
+| `POST` | `/integrations/slack/disconnect` | Disconnect Slack |
+| `GET` | `/integrations/slack/channels` | List accessible channels |
+| `POST` | `/integrations/slack/ingest` | Ingest messages from selected channels |
+
+> Interactive Swagger UI available at `/docs` on the running backend.
+
+---
+
+## 12. Frontend Route Map
+
+| Route | Auth Required | Description |
+|---|---|---|
+| `/` | Public | Landing page |
+| `/login` | Public | Email/password login |
+| `/register` | Public | Account registration |
+| `/dashboard` | Protected | Session list + board overview |
+| `/ingestion` | Protected | Data ingestion — upload, demo, Slack |
+| `/signals` | Protected | Signal review — active and suppressed |
+| `/brd` | Protected | BRD editor — sections, flags, editing |
+| `/export` | Protected | Export as `.md`, `.html`, `.docx` |
+| `/profile` | Protected | Integrations (Slack, Gmail) and settings |
+| `/invite/[token]` | Public | Join a shared board via invite link |
+| `/agents` | Protected | Agent orchestrator view |
+| `/analytics` | Protected | Conflict detection and traceability |
+| `/editor` | Protected | Full BRD editor view |
+
+---
+
+## 13. Tech Stack
 
 ### Frontend
 
-- Next.js 14 (App Router)
-- React 18
-- TypeScript
-- Tailwind CSS
-- Zustand
-- Framer Motion
-- Firebase Auth + Firestore SDK
+| Technology | Version | Role |
+|---|---|---|
+| Next.js | 14 (App Router) | Full-stack React framework |
+| TypeScript | 5 | Type safety across all components |
+| Tailwind CSS | 3 | Utility-first styling |
+| Framer Motion | 11 | Animations and transitions |
+| Zustand | 5 | Client-side state management |
+| Firebase | 12 client + 13 admin | Auth and Firestore |
+| Lucide React | 0.300 | Icon library |
+| Radix UI | — | Accessible headless components |
 
 ### Backend
 
-- Python
-- FastAPI + Uvicorn
-- Groq SDK
-- Pydantic
-- psycopg2
-- SQLite fallback
+| Technology | Version | Role |
+|---|---|---|
+| FastAPI | ≥ 0.100 | REST API framework |
+| Uvicorn | ≥ 0.22 | ASGI server |
+| Groq Python SDK | ≥ 0.4 | LLM inference (llama-3.1-8b-instant) |
+| psycopg2-binary | ≥ 2.9 | PostgreSQL driver |
+| python-docx | ≥ 0.8.11 | DOCX export |
+| WeasyPrint | ≥ 60 | HTML-to-PDF export (requires system libs) |
+| slack-sdk | ≥ 3.21 | Slack OAuth and API |
+| pydantic | ≥ 2.0 | Request and response validation |
+| python-dotenv | ≥ 1.0 | Environment variable loading |
 
-### Export And Document Processing
+---
 
-- Markdown conversion
-- WeasyPrint (PDF capable path)
-- python-docx (DOCX template fill and generation)
+## 14. Repository Structure
 
-### External Integrations
-
-- Slack SDK/OAuth
-- Google OAuth + Gmail API
-
-## Repository Structure
-
-```text
+```
 Beacon/
-  README.md
-  backend/
-    api/
-    brd_module/
-    Noise filter module/
-    Integration Module/
-    requirements.txt
-    SETUP.md
-  frontend/
-    src/
-    assets/
-    apiClient and stores
-    CONTRIBUTING.md
-    package.json
+├── README.md                    ← This file
+├── DEPLOY-GUIDE.md              ← Full deployment guide
+├── CONTRIBUTING.md
+├── start-dev.ps1                ← Local dev launcher (Windows)
+│
+├── backend/
+│   ├── Dockerfile               ← Docker image for Render
+│   ├── requirements.txt
+│   ├── SETUP.md
+│   ├── api/
+│   │   ├── main.py              ← FastAPI app + CORS + router registration
+│   │   └── routers/
+│   │       ├── sessions.py      ← Session CRUD
+│   │       ├── ingest.py        ← File upload + demo dataset
+│   │       ├── review.py        ← Chunk listing + restore
+│   │       ├── brd.py           ← BRD generation, export, SSE stream
+│   │       ├── hitl.py          ← Human-in-the-loop prompt
+│   │       └── slack.py         ← Slack OAuth + channel ingest
+│   ├── brd_module/
+│   │   ├── brd_pipeline.py      ← Multi-agent orchestrator (7 agents)
+│   │   ├── validator.py         ← Gap + contradiction validation
+│   │   ├── exporter.py          ← md / html / docx export
+│   │   ├── storage.py           ← AKS DB (PG + SQLite fallback)
+│   │   ├── schema.py            ← Pydantic models
+│   │   └── hitl/
+│   │       ├── versioned_ledger.py  ← Section lock + version history
+│   │       └── orchestrator.py      ← Ad-hoc prompt handler
+│   ├── Noise filter module/
+│   │   ├── classifier.py        ← Two-phase classification engine
+│   │   ├── prompts.py           ← LLM prompt templates
+│   │   ├── schema.py
+│   │   └── storage.py
+│   └── Integration Module/
+│       ├── gmail.py
+│       ├── slack_auth.py
+│       └── routes/
+│
+└── frontend/
+    ├── next.config.mjs
+    ├── package.json
+    ├── tailwind.config.ts
+    └── src/
+        ├── middleware.ts        ← Route protection
+        ├── app/                 ← App Router pages
+        ├── components/
+        │   ├── workspace/       ← IngestionPanel, BRDEditor, AgentOrchestrator
+        │   ├── layout/          ← DashboardShell, Navbar
+        │   └── ui/              ← Radix + custom UI primitives
+        ├── contexts/
+        │   └── AuthContext.tsx
+        ├── lib/
+        │   ├── apiClient.ts     ← Typed FastAPI client
+        │   ├── firebase.ts      ← Client SDK
+        │   └── firebaseAdmin.ts ← Server-only Admin SDK
+        └── store/
+            └── useBRDStore.ts   ← Zustand store
 ```
 
-## Local Setup And Run
+---
+
+## 15. Local Development Setup
 
 ### Prerequisites
 
 - Node.js 18+
-- npm
 - Python 3.9+
-- Optional PostgreSQL (or use SQLite fallback)
-- Firebase project for auth/collaboration features
+- PostgreSQL (optional — SQLite fallback activates automatically when Postgres is unreachable)
+- [mkcert](https://github.com/FiloSottile/mkcert) — only needed for Slack OAuth on localhost (HTTPS required)
 
-### 1) Clone
+### 1. Clone
 
 ```bash
 git clone https://github.com/simplysandeepp/Beacon.git
 cd Beacon
 ```
 
-### 2) Backend Setup
+### 2. Backend
 
 ```bash
 cd backend
 python -m venv .venv
+
+# Windows
 .venv\Scripts\activate
+# Linux / Mac
+source .venv/bin/activate
+
 pip install -r requirements.txt
-uvicorn api.main:app --reload --port 8000
 ```
 
-API default URL:
-
-- http://localhost:8000
-- Docs: http://localhost:8000/docs
-
-### 3) Frontend Setup
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Frontend default URL:
-
-- http://localhost:3000
-
-### 4) Connect Frontend To Backend
-
-Set in frontend environment:
-
-- `NEXT_PUBLIC_API_URL=http://localhost:8000`
-
-## Environment Variables
-
-Do not commit secrets. Use local environment files.
-
-### Backend (`backend/.env`)
+Create `backend/.env`:
 
 ```env
-# Database
+GROQ_API_KEY=gsk_your_groq_key
+GROQ_CLOUD_API=gsk_your_groq_key
+
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=beacon_aks
 DB_USER=postgres
-DB_PASS=postgres
+DB_PASS=yourpassword
 
-# LLM
-GROQ_CLOUD_API=your_groq_api_key
+BACKEND_PUBLIC_URL=http://localhost:8000
+FRONTEND_URL=http://localhost:3000
 
-# Optional demo cache session key
-DEMO_CACHE_SESSION_ID=default_session
-
-# Optional integration module credentials
-SLACK_CLIENT_ID=...
-SLACK_CLIENT_SECRET=...
-GOOGLE_CLIENT_ID=...
-GOOGLE_CLIENT_SECRET=...
+# Optional — leave blank to disable Slack integration locally
+SLACK_CLIENT_ID=
+SLACK_CLIENT_SECRET=
 ```
 
-### Frontend (`frontend/.env.local`)
+Start:
+
+```bash
+# Plain HTTP (recommended for local dev)
+uvicorn api.main:app --reload --port 8000
+```
+
+### 3. Frontend
+
+```bash
+cd frontend
+npm install
+```
+
+Create `frontend/.env.local`:
 
 ```env
-# Backend API
 NEXT_PUBLIC_API_URL=http://localhost:8000
 
-# Firebase client
-NEXT_PUBLIC_FIREBASE_API_KEY=...
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
-NEXT_PUBLIC_FIREBASE_APP_ID=...
+NEXT_PUBLIC_FIREBASE_API_KEY=your_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789
+NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:abc123
 
-# Firebase admin (server-side usage in frontend app runtime)
-FIREBASE_ADMIN_PROJECT_ID=...
-FIREBASE_ADMIN_CLIENT_EMAIL=...
-FIREBASE_ADMIN_PRIVATE_KEY=...
+FIREBASE_ADMIN_PROJECT_ID=your_project
+FIREBASE_ADMIN_CLIENT_EMAIL=firebase-adminsdk@your_project.iam.gserviceaccount.com
+FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 ```
 
-## Deployment Notes
+Start:
 
-- Current live deployment: https://brd-agent-xi.vercel.app/
-- Repository remote origin: https://github.com/simplysandeepp/Beacon.git
-- `frontend/vercel.json` and root `vercel.json` indicate frontend build strategy.
-- For Vercel deployment from monorepo, set frontend as the build target/root as required by your pipeline.
+```bash
+npm run dev
+```
 
-## Contributing
+### 4. One-Command Launch (Windows)
 
-Use the repository contributing workflow:
+```powershell
+.\start-dev.ps1
+```
 
-- Guide: [CONTRIBUTING.md](CONTRIBUTING.md)
-- Recommended baseline:
-  - Create feature branches
-  - Keep commits scoped and descriptive
-  - Run local checks before pushing
-  - Add/adjust tests for behavior changes
+Opens backend and frontend in separate terminal windows.
 
-Suggested commit format:
+---
 
-- `feat: ...`
-- `fix: ...`
-- `refactor: ...`
-- `docs: ...`
-
-## Testing
+## 16. Environment Variables
 
 ### Backend
 
-From `backend/`:
-
-```bash
-pytest
-```
+| Variable | Required | Description |
+|---|---|---|
+| `GROQ_API_KEY` | Yes | Groq API key for LLM calls |
+| `GROQ_CLOUD_API` | Yes | Alias used by noise filter and BRD modules |
+| `DB_HOST` | Yes | PostgreSQL host |
+| `DB_PORT` | Yes | PostgreSQL port (default `5432`) |
+| `DB_NAME` | Yes | Database name |
+| `DB_USER` | Yes | Database user |
+| `DB_PASS` | Yes | Database password |
+| `BACKEND_PUBLIC_URL` | Yes (prod) | Used to build Slack OAuth redirect URI |
+| `FRONTEND_URL` | Yes (prod) | Used to redirect after Slack OAuth completes |
+| `SLACK_CLIENT_ID` | Optional | Slack app client ID |
+| `SLACK_CLIENT_SECRET` | Optional | Slack app client secret |
+| `SLACK_REDIRECT_URI` | Optional | Auto-derived from `BACKEND_PUBLIC_URL` if omitted |
+| `DEMO_CACHE_SESSION_ID` | Optional | Session with pre-classified demo chunks for instant demo |
 
 ### Frontend
 
-From `frontend/`:
-
-```bash
-npm run build
-```
-
-The frontend build acts as a basic type and compile integrity check.
-
-## Known Gaps And Practical Notes
-
-- Some pages are fully wired to backend APIs (ingestion, signals, BRD, export).
-- Some analytics/profile views currently use static or placeholder data models in UI.
-- HITL endpoints include working prompt pathway plus some stub routes.
-- PDF export path depends on local runtime support for WeasyPrint native dependencies.
-- Session and board concepts are related but managed in both backend and Firestore layers.
-
-## Screenshots Gallery
-
-### Website Screen Flow (Correct Order)
-
-1. `website1.png`  
-![website1](frontend/assets/website1.png)
-
-2. `website2.png`  
-![website2](frontend/assets/website2.png)
-
-3. `website3.png`  
-![website3](frontend/assets/website3.png)
-
-4. `website4.png`  
-![website4](frontend/assets/website4.png)
-
-5. `website5.png`  
-![website5](frontend/assets/website5.png)
-
-6. `website6.png`  
-![website6](frontend/assets/website6.png)
-
-7. `website7.png`  
-![website7](frontend/assets/website7.png)
-
-### Additional Screens And Diagrams
-
-1. `brd-draft.png`  
-![brd-draft](frontend/assets/brd-draft.png)
-
-2. `brd-sharable-link.png`  
-![brd-sharable-link](frontend/assets/brd-sharable-link.png)
-
-3. `dashbaord.png`  
-![dashbaord](frontend/assets/dashbaord.png)
-
-4. `settings.png`  
-![settings](frontend/assets/settings.png)
-
-5. `source.png`  
-![source](frontend/assets/source.png)
-
-6. `multiagent-flowchar.jpeg`  
-![multiagent-flowchar](frontend/assets/multiagent-flowchar.jpeg)
-
-7. `website_architectural-flowchart.jpeg`  
-![website_architectural-flowchart](frontend/assets/website_architectural-flowchart.jpeg)
+| Variable | Required | Description |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | Yes | Backend base URL (e.g. `https://beacon-api.onrender.com`) |
+| `NEXT_PUBLIC_FIREBASE_API_KEY` | Yes | Firebase client config |
+| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Yes | Firebase client config |
+| `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | Yes | Firebase client config |
+| `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` | Yes | Firebase client config |
+| `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Yes | Firebase client config |
+| `NEXT_PUBLIC_FIREBASE_APP_ID` | Yes | Firebase client config |
+| `FIREBASE_ADMIN_PROJECT_ID` | Yes | Firebase Admin SDK — server-only |
+| `FIREBASE_ADMIN_CLIENT_EMAIL` | Yes | Firebase Admin SDK service account email |
+| `FIREBASE_ADMIN_PRIVATE_KEY` | Yes | RSA private key — escape newlines as `\n` |
 
 ---
 
-If you want, this README can be extended further with:
+## 17. Deployment
 
-- API request/response examples per endpoint
-- ER diagrams for Firestore + AKS tables
-- sequence diagrams for share invite lifecycle
-- environment matrix per dev/staging/prod
+See the full step-by-step guide in **[DEPLOY-GUIDE.md](DEPLOY-GUIDE.md)** — covers Vercel, Render, Firebase, Slack OAuth, and Postgres provisioning with exact field values.
+
+**Quick summary:**
+- **Frontend → Vercel** — Root Directory: `frontend`. Add all env vars in the Vercel dashboard. Set `NEXT_PUBLIC_API_URL` to your Render URL after the backend is live.
+- **Backend → Render** — Docker deploy from `backend/`. Add Groq, DB, and URL env vars. Use Render Postgres add-on or Supabase/Neon for the database.
 
 ---
 
-# Thankyou :) 🎀
+## 18. Team
 
-### Social Handle
+| Name | Role | GitHub |
+|---|---|---|
+| Sandeep Prajapati | Team Lead | [@simplysandeepp](https://github.com/simplysandeepp) |
+| Kurian Jose | Team Member | [@KurianJose7586](https://github.com/KurianJose7586) |
+| Preet Biswas | Team Member | [@preetbiswas12](https://github.com/preetbiswas12) |
+| Aryan Singh | Team Member | [@DevAryanSin](https://github.com/DevAryanSin) |
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-simplysandeepp-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/simplysandeepp/)
-[![Pinterest](https://img.shields.io/badge/Pinterest-simplysandeepp-E60023?style=for-the-badge&logo=pinterest&logoColor=white)](https://in.pinterest.com/simplysandeepp/)
-[![LeetCode](https://img.shields.io/badge/LeetCode-simplysandeepp-FFA116?style=for-the-badge&logo=leetcode&logoColor=black)](https://leetcode.com/u/simplysandeepp/)
-[![X](https://img.shields.io/badge/X-simplysandeepp-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/simplysandeepp/)
-[![Instagram](https://img.shields.io/badge/Instagram-simplysandeepp-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://instagram.com/simplysandeepp/)
+---
 
-<img src="https://user-images.githubusercontent.com/74038190/225813708-98b745f2-7d22-48cf-9150-083f1b00d6c9.gif" width="500">
+<div align="center">
+
+Built with love for HackFest 2.0
+
+[Live Demo](https://brd-agent-xi.vercel.app/) &middot; [Deploy Guide](DEPLOY-GUIDE.md) &middot; [Contributing](CONTRIBUTING.md)
+
+</div>
