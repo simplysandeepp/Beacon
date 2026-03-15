@@ -645,7 +645,7 @@ export default function IngestionPage() {
 
                     {!gmailStatus?.connected ? (
                         <button
-                            onClick={() => setGmailReplicaOpen(true)}
+                            onClick={startGmailConnect}
                             disabled={gmailLoading || !gmailStatus?.available}
                             className="btn-primary w-full text-sm flex items-center justify-center gap-2 disabled:opacity-50"
                         >
@@ -659,7 +659,7 @@ export default function IngestionPage() {
                                 className="btn-primary w-full text-sm flex items-center justify-center gap-2"
                             >
                                 <Mail size={13} />
-                                Connect to Gmail
+                                Open Gmail
                             </button>
                             <button
                                 onClick={() => syncSelectedGmailEmails()}
