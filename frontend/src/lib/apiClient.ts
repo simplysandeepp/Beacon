@@ -1,3 +1,5 @@
+import { useAuthStore } from "@/store/useAuthStore";
+
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 function joinUrl(base: string, path: string): string {
@@ -5,7 +7,20 @@ function joinUrl(base: string, path: string): string {
 }
 
 async function apiFetch<T = unknown>(path: string, options?: RequestInit): Promise<T> {
-    const res = await fetch(joinUrl(BASE, path), options);
+    const uid = useAuthStore.getState().user?.uid;
+    const headers = {
+        ...(options?.headers as any),
+        ...(uid ? { 'X-User-UID': uid } : {})
+    };
+    
+    const res = await fetch(joinUrl(BASE, path), {
+        ...options,
+        headers: {
+            ...headers,
+            ...(options?.body && !(options.body instanceof FormData) ? { 'Content-Type': 'application/json' } : {})
+        }
+    });
+
     if (!res.ok) {
         const errorText = await res.text().catch(() => "Unknown error");
         const error = new Error(`API error ${res.status}: ${errorText}`);
@@ -490,16 +505,18 @@ export async function getGmailAttachment(messageId: string, attachmentId: string
 }
 
 export async function getGmailOAuthUrl(): Promise<string> {
+    const uid = useAuthStore.getState().user?.uid;
+    const query = uid ? `?uid=${uid}` : "";
     try {
         // Probe the active route family once and return a direct auth URL.
         await apiFetch<unknown>("/integrations/gmail/status");
-        return joinUrl(BASE, "/integrations/gmail/auth/start");
+        return joinUrl(BASE, `/integrations/gmail/auth/start${query}`);
     } catch (error) {
         const status = (error as { status?: number })?.status;
         if (status === 404) {
-            return joinUrl(BASE, "/gmail/login");
+            return joinUrl(BASE, `/gmail/login${query}`);
         }
-        return joinUrl(BASE, "/integrations/gmail/auth/start");
+        return joinUrl(BASE, `/integrations/gmail/auth/start${query}`);
     }
 }
 
