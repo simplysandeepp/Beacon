@@ -64,6 +64,31 @@ def _get_uid_from_request(request: Request):
         uid = request.query_params.get("uid")
     return uid
 
+_user_request_log = {}  # uid -> [timestamp, timestamp, ...]
+
+def _check_rate_limit(uid: str, max_requests: int = 15, period: int = 60):
+    """
+    Simple in-memory Rate Limiter. 
+    Allows max_requests in a rolling 'period' (seconds) window.
+    """
+    if not uid:
+        return True  # If no UID, we skip for now (or track by IP)
+        
+    now = time.time()
+    if uid not in _user_request_log:
+        _user_request_log[uid] = []
+    history = _user_request_log[uid]
+    
+    # Filter out requests that are older than the time window
+    updated_history = [t for t in history if now - t < period]
+    _user_request_log[uid] = updated_history
+    
+    if len(updated_history) >= max_requests:
+        raise HTTPException(status_code=429, detail="Too many requests. Please try again after a minute.")
+        
+    _user_request_log[uid].append(now)
+    return True
+
 def _get_redirect_uri():
     redirect_uri = os.getenv("GOOGLE_REDIRECT_URI")
     if redirect_uri:
@@ -229,6 +254,7 @@ def gmail_oauth_redirect(request: Request):
 @router.get("/status")
 def gmail_status(request: Request):
     uid = _get_uid_from_request(request)
+    _check_rate_limit(uid, max_requests=40)  # Status can be polished often
     creds_data = user_credentials.get(uid) if uid else None
     connected = bool(creds_data)
     available = bool(CLIENT_ID and CLIENT_SECRET)
@@ -246,6 +272,7 @@ def gmail_status(request: Request):
 @router.post("/disconnect")
 def gmail_disconnect(request: Request):
     uid = _get_uid_from_request(request)
+    _check_rate_limit(uid, max_requests=5)
     if uid and uid in user_credentials:
         del user_credentials[uid]
     return {"message": "Gmail disconnected."}
@@ -253,11 +280,12 @@ def gmail_disconnect(request: Request):
 @router.get("/profile")
 def gmail_profile(request: Request):
     uid = _get_uid_from_request(request)
+    _check_rate_limit(uid, max_requests=15)
     credentials = _get_credentials(uid)
     try:
         from googleapiclient.discovery import build  # type: ignore
         service = build('oauth2', 'v2', credentials=credentials)
-        user_info = service.userinfo().get().execute()
+        user_info = gmail.execute_with_retry(service.userinfo().get())
         return {
             "name": user_info.get("name"),
             "email": user_info.get("email"),
@@ -269,10 +297,11 @@ def gmail_profile(request: Request):
 @router.get("/labels")
 def gmail_labels(request: Request):
     uid = _get_uid_from_request(request)
+    _check_rate_limit(uid, max_requests=15)
     credentials = _get_credentials(uid)
     try:
         service = gmail.get_gmail_service(credentials)
-        results = service.users().labels().list(userId='me').execute()
+        results = gmail.execute_with_retry(service.users().labels().list(userId='me'))
         labels = results.get('labels', [])
         
         system_ids = ['INBOX', 'STARRED', 'SENT', 'DRAFTS', 'SPAM', 'TRASH']
@@ -288,10 +317,11 @@ def gmail_labels(request: Request):
 @router.get("/threads/{thread_id}")
 def gmail_thread_detail(thread_id: str, request: Request):
     uid = _get_uid_from_request(request)
+    _check_rate_limit(uid, max_requests=25)
     credentials = _get_credentials(uid)
     try:
         service = gmail.get_gmail_service(credentials)
-        thread = service.users().threads().get(userId='me', id=thread_id, format='full').execute()
+        thread = gmail.execute_with_retry(service.users().threads().get(userId='me', id=thread_id, format='full'))
         return thread
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -299,12 +329,13 @@ def gmail_thread_detail(thread_id: str, request: Request):
 @router.get("/messages/{message_id}/attachments/{attachment_id}")
 def gmail_attachment(message_id: str, attachment_id: str, request: Request):
     uid = _get_uid_from_request(request)
+    _check_rate_limit(uid, max_requests=20)
     credentials = _get_credentials(uid)
     try:
         service = gmail.get_gmail_service(credentials)
-        attachment = service.users().messages().attachments().get(
+        attachment = gmail.execute_with_retry(service.users().messages().attachments().get(
             userId="me", messageId=message_id, id=attachment_id
-        ).execute()
+        ))
         return attachment
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -320,6 +351,7 @@ def gmail_check(
     has_attachments: bool = Query(default=None)
 ):
     uid = _get_uid_from_request(request)
+    _check_rate_limit(uid, max_requests=20)  # Search queries rate limit
     credentials = _get_credentials(uid)
     
     # Build search query
@@ -338,7 +370,7 @@ def gmail_check(
         if query_string:
             list_kwargs["q"] = query_string
             
-        results = service.users().messages().list(**list_kwargs).execute()
+        results = gmail.execute_with_retry(service.users().messages().list(**list_kwargs))
         messages = results.get("messages", [])
         
         if not messages:
@@ -360,6 +392,7 @@ def gmail_check(
 @router.post("/ingest")
 def gmail_ingest(body: GmailIngestRequest, request: Request):
     uid = _get_uid_from_request(request)
+    _check_rate_limit(uid, max_requests=5)  # ingestion is heavy
     credentials = _get_credentials(uid)
     service = gmail.get_gmail_service(credentials)
     

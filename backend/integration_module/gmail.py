@@ -1,6 +1,22 @@
 import base64
 import re
-from googleapiclient.discovery import build
+import time
+import random
+from googleapiclient.discovery import build  # type: ignore
+from googleapiclient.errors import HttpError  # type: ignore
+
+def execute_with_retry(request, max_retries=5):
+    """Execute a Google API request with exponential backoff on 429 and 5xx errors."""
+    for n in range(max_retries):
+        try:
+            return request.execute()
+        except HttpError as e:
+            if e.resp.status in [429, 500, 502, 503, 504]:
+                sleep_time = (2 ** n) + random.random()
+                time.sleep(sleep_time)
+            else:
+                raise e
+    return request.execute()
 
 def strip_html_tags(text):
     """Remove HTML tags, CSS, URLs and all newline characters, returning a single line of text."""
@@ -42,7 +58,7 @@ def get_body(payload):
 
 def get_email_details(service, msg_id):
     """Fetch and parse email details including subject, sender, and body."""
-    msg = service.users().messages().get(userId="me", id=msg_id).execute()
+    msg = execute_with_retry(service.users().messages().get(userId="me", id=msg_id))
     headers = msg.get("payload", {}).get("headers", [])
     subject = "No Subject"
     sender = "Unknown"
@@ -86,9 +102,9 @@ def get_attachments(payload):
 
 def download_attachment(service, message_id, attachment_id):
     """Fetch the content of an attachment."""
-    attachment = service.users().messages().attachments().get(
+    attachment = execute_with_retry(service.users().messages().attachments().get(
         userId="me", messageId=message_id, id=attachment_id
-    ).execute()
+    ))
     return base64.urlsafe_b64decode(attachment.get("data").encode("UTF-8"))
 
 def get_gmail_service(credentials):

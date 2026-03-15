@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { 
     Search, Filter, ChevronDown, Mail, Inbox, Send, Star, Clock, Trash2, 
     MoreVertical, CheckSquare, Square, RefreshCcw, X, Paperclip, 
@@ -28,6 +28,9 @@ export default function GmailReplica({ onClose, onIngest, isIngesting }: GmailRe
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [activeFolder, setActiveFolder] = useState('INBOX');
     const [nextPageToken, setNextPageToken] = useState<string | null>(null);
+    
+    // In-memory cache for the lifespan of this component render
+    const cacheRef = useRef<{ [key: string]: { emails: GmailEmail[], nextPageToken: string | null } }>({});
     
     // Auth & Profile
     const [status, setStatus] = useState<{connected: boolean, available: boolean} | null>(null);
@@ -61,42 +64,57 @@ export default function GmailReplica({ onClose, onIngest, isIngesting }: GmailRe
         }
     }, []);
 
-    const fetchEmails = useCallback(async (options: GmailSearchOptions = {}, append = false) => {
+    const fetchEmails = useCallback(async (options: GmailSearchOptions & { forceRefresh?: boolean } = {}, append = false) => {
         setLoading(true);
         setError(null);
         try {
             let qParts = [];
             
-            // Use provided 'q' or current search query
             if (options.q !== undefined) {
                 if (options.q) qParts.push(options.q);
             } else if (searchQuery) {
                 qParts.push(searchQuery);
             }
 
-            // From/To filters - These are now "Global" if provided
             const finalFrom = options.from !== undefined ? options.from : fromMail;
             const finalTo = options.to !== undefined ? options.to : toMail;
             
             if (finalFrom) qParts.push(`from:${finalFrom}`);
             if (finalTo) qParts.push(`to:${finalTo}`);
             
-            // If we have From/To/Subject(q), we might want to search All Mail.
-            // But if we are explicitly on a folder and NO From/To is provided, use the label.
-            // The user said: "should not be label specific work for all messages"
             const queryIsGlobal = !!(finalFrom || finalTo);
 
             if (!queryIsGlobal && activeFolder !== 'INBOX') {
                 qParts.push(`label:${activeFolder}`);
             }
 
+            const cacheKey = qParts.length > 0 ? qParts.join(' ') : `folder:${activeFolder}`;
+
+            // 1. Check Cache before hitting API
+            if (!append && !options.pageToken && !options.forceRefresh && cacheRef.current[cacheKey]) {
+                const cached = cacheRef.current[cacheKey];
+                setEmails(cached.emails);
+                setNextPageToken(cached.nextPageToken);
+                setLoading(false);
+                return;
+            }
+
             const res = await listGmailEmails({ 
                 count: 30, 
                 ...options,
-                q: qParts.join(' ')
+                q: qParts.length > 0 ? qParts.join(' ') : undefined
             });
+
             setEmails(prev => append ? [...prev, ...res.emails] : res.emails);
             setNextPageToken(res.next_page_token || null);
+
+            // 2. Save into Cache
+            if (!append && !options.pageToken) {
+                cacheRef.current[cacheKey] = {
+                    emails: res.emails,
+                    nextPageToken: res.next_page_token || null
+                };
+            }
         } catch (e: any) {
             if (e.status === 401) {
                 setStatus(prev => prev ? { ...prev, connected: false } : null);
@@ -290,7 +308,7 @@ export default function GmailReplica({ onClose, onIngest, isIngesting }: GmailRe
 
                 <div className="flex items-center gap-3 ml-4">
                     <button 
-                        onClick={() => status?.connected ? fetchEmails() : fetchStatus()} 
+                        onClick={() => status?.connected ? fetchEmails({ forceRefresh: true }) : fetchStatus()} 
                         disabled={loading}
                         className="p-2 hover:bg-white/10 rounded-full text-zinc-400 transition-colors disabled:opacity-30"
                     >
