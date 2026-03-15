@@ -6,11 +6,11 @@ import time
 from typing import List
 from urllib.parse import quote
 
-from fastapi import APIRouter, Request, HTTPException, Response, Query
-from fastapi.responses import RedirectResponse
-from google_auth_oauthlib.flow import Flow
-from google.oauth2.credentials import Credentials
-from pydantic import BaseModel
+from fastapi import APIRouter, Request, HTTPException, Response, Query  # type: ignore
+from fastapi.responses import RedirectResponse  # type: ignore
+from google_auth_oauthlib.flow import Flow  # type: ignore
+from google.oauth2.credentials import Credentials  # type: ignore
+from pydantic import BaseModel  # type: ignore
 
 # Add parent directories to sys.path if needed
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -20,15 +20,15 @@ NOISE_FILTER_PATH = os.path.join(PROJECT_ROOT, "Noise filter module")
 if NOISE_FILTER_PATH not in sys.path:
     sys.path.append(NOISE_FILTER_PATH)
 
-from .. import gmail
-from .. import pdf
-from ..state import user_credentials
-from brd_module.storage import store_chunks
-from classifier import classify_chunks
-from schema import ClassifiedChunk, SignalLabel
+from .. import gmail  # type: ignore
+from .. import pdf  # type: ignore
+from ..state import user_credentials  # type: ignore
+from brd_module.storage import store_chunks  # type: ignore
+from classifier import classify_chunks  # type: ignore
+from schema import ClassifiedChunk, SignalLabel  # type: ignore
 
-import google.auth.exceptions
-from google.auth.transport.requests import Request as AuthRequest
+import google.auth.exceptions  # type: ignore
+from google.auth.transport.requests import Request as AuthRequest  # type: ignore
 
 router = APIRouter(prefix="/integrations/gmail", tags=["Gmail Integration"])
 
@@ -233,7 +233,7 @@ def gmail_disconnect():
 def gmail_profile():
     credentials = _get_credentials()
     try:
-        from googleapiclient.discovery import build
+        from googleapiclient.discovery import build  # type: ignore
         service = build('oauth2', 'v2', credentials=credentials)
         user_info = service.userinfo().get().execute()
         return {
