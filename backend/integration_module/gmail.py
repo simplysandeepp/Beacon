@@ -18,7 +18,7 @@ def execute_with_retry(request, max_retries=5):
                 raise e
     return request.execute()
 
-def strip_html_tags(text):
+def strip_html_tags(text: str):
     """Remove HTML tags, CSS, URLs and all newline characters, returning a single line of text."""
     # Remove style and script tags and their content
     text = re.sub(r'<(style|script)[^>]*>.*?</\1>', ' ', text, flags=re.DOTALL | re.IGNORECASE)
@@ -33,7 +33,7 @@ def strip_html_tags(text):
     text = re.sub(r'\s+', ' ', text)
     return text.strip()
 
-def get_body(payload):
+def get_body(payload: dict):
     """Recursively extract and decode the body from a Gmail message payload."""
     body = ""
     if "parts" in payload:
@@ -42,18 +42,18 @@ def get_body(payload):
             data = part.get("body", {}).get("data")
             if mimeType == "text/plain" and data:
                 plain_text = base64.urlsafe_b64decode(data).decode("utf-8")
-                body += strip_html_tags(plain_text) + " "
+                body += strip_html_tags(str(plain_text)) + " "
             elif mimeType == "text/html" and data:
                 html_content = base64.urlsafe_b64decode(data).decode("utf-8")
                 if not body.strip():
-                    body += strip_html_tags(html_content) + " "
+                    body += strip_html_tags(str(html_content)) + " "
             elif "parts" in part:
                 body += get_body(part) + " "
     else:
         data = payload.get("body", {}).get("data")
         if data:
             content = base64.urlsafe_b64decode(data).decode("utf-8")
-            body = strip_html_tags(content)
+            body = strip_html_tags(str(content))
     return body
 
 def get_email_details(service, msg_id):
