@@ -343,22 +343,28 @@ export default function DashboardShell({ children }: { children: React.ReactNode
                                     <div className={cn("w-1.5 h-1.5 rounded-full", apiConnected ? "bg-emerald-400" : "bg-red-400")} />
                                 </div>
 
-                                <div className="flex items-center gap-2.5 px-2 py-2 rounded-lg glass-card">
-                                    <div className="w-7 h-7 rounded-full bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0">
+                                <Link
+                                    href="/profile"
+                                    className="flex items-center gap-2.5 px-2 py-2 rounded-lg glass-card hover:bg-white/5 transition-all group/user"
+                                >
+                                    <div className="w-7 h-7 rounded-full bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0 group-hover/user:border-white/40 transition-colors">
                                         <User size={12} className="text-zinc-200" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-xs font-medium text-zinc-200 truncate">{user?.name ?? "User"}</p>
+                                        <p className="text-xs font-medium text-zinc-200 truncate group-hover/user:text-white transition-colors">{user?.name ?? "User"}</p>
                                         <p className="text-[10px] text-zinc-500 truncate">{user?.email ?? ""}</p>
                                     </div>
                                     <button
-                                        onClick={handleLogout}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            handleLogout();
+                                        }}
                                         title="Logout"
-                                        className="p-1 rounded text-zinc-600 hover:text-red-400 transition-colors flex-shrink-0"
+                                        className="p-1 rounded text-zinc-600 hover:text-red-400 transition-colors flex-shrink-0 relative z-10"
                                     >
                                         <LogOut size={12} />
                                     </button>
-                                </div>
+                                </Link>
                             </div>
                         </motion.aside>
                     )}

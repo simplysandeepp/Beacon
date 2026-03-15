@@ -68,10 +68,15 @@ export default function Sidebar() {
 
             {/* User Avatar */}
             <div className="mt-auto">
-                <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-cyan-500 border border-white/20 shadow-lg cursor-pointer"
-                />
+                <Link href="/profile">
+                    <motion.div
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-cyan-500 border border-white/20 shadow-lg cursor-pointer flex items-center justify-center overflow-hidden"
+                    >
+                        <User size={20} className="text-white/80" />
+                    </motion.div>
+                </Link>
             </div>
         </motion.aside>
     );

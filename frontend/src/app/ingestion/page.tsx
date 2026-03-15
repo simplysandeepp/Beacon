@@ -22,14 +22,19 @@ import {
     ingestSlackChannels,
     disconnectSlack,
     getGmailStatus,
-    getGmailLoginUrl,
+    getGmailOAuthUrl,
+    disconnectGmail,
+    listGmailEmails,
+    ingestGmailEmails,
     type Chunk,
     type GmailStatus,
+    type GmailEmail,
     type SlackChannel,
     type SlackStatus,
 } from '@/lib/apiClient';
 import { useSessionStore } from '@/store/useSessionStore';
 import { useAuth } from '@/contexts/AuthContext';
+import GmailReplica from '@/components/features/GmailWindow';
 
 // ─── Static Connector Data ────────────────────────────────────────────────────
 
@@ -78,18 +83,18 @@ export default function IngestionPage() {
     const [slackLoading, setSlackLoading] = useState(false);
     const [slackSyncing, setSlackSyncing] = useState(false);
     const [slackMessage, setSlackMessage] = useState<string | null>(null);
-    const [gmailStatus, setGmailStatus] = useState<GmailStatus>({
-        available: false,
-        connected: false,
-        message: 'Checking Gmail connector...',
-    });
-    const [gmailChecked, setGmailChecked] = useState(false);
+    const [gmailStatus, setGmailStatus] = useState<GmailStatus | null>(null);
+    const [gmailEmails, setGmailEmails] = useState<GmailEmail[]>([]);
+    const [selectedGmailEmails, setSelectedGmailEmails] = useState<string[]>([]);
+    const [gmailLoading, setGmailLoading] = useState(false);
+    const [gmailSyncing, setGmailSyncing] = useState(false);
     const [gmailMessage, setGmailMessage] = useState<string | null>(null);
     const [expandedChunk, setExpandedChunk] = useState<string | null>(null);
     const [reviewLoading, setReviewLoading] = useState(false);
     const [activeSignals, setActiveSignals] = useState<Chunk[]>([]);
     const [suppressedSignals, setSuppressedSignals] = useState<Chunk[]>([]);
     const [restoringChunkId, setRestoringChunkId] = useState<string | null>(null);
+    const [gmailReplicaOpen, setGmailReplicaOpen] = useState(false);
 
     const ensureSessionId = async (): Promise<string> => {
         if (sessionId) return sessionId;
@@ -142,26 +147,62 @@ export default function IngestionPage() {
     };
 
     const syncGmailData = async () => {
-        setGmailChecked(false);
+        setGmailLoading(true);
         try {
             const status = await getGmailStatus();
             setGmailStatus(status);
+            if (status.connected) {
+                const res = await listGmailEmails({ count: 10 });
+                setGmailEmails(res.emails);
+            } else {
+                setGmailEmails([]);
+                setSelectedGmailEmails([]);
+                setGmailMessage(null);
+            }
+        } catch (e) {
+            setUploadError(e instanceof Error ? e.message : 'Failed to load Gmail integration data');
         } finally {
-            setGmailChecked(true);
+            setGmailLoading(false);
         }
     };
 
-    const startGmailConnect = () => {
-        if (!gmailStatus.available) {
-            setUploadError('Gmail API is not available on this backend runtime.');
+    const startGmailConnect = async () => {
+        try {
+            const authUrl = await getGmailOAuthUrl();
+            window.location.href = authUrl;
+        } catch (e) {
+            setUploadError(e instanceof Error ? e.message : 'Failed to start Gmail OAuth');
+        }
+    };
+
+    const syncSelectedGmailEmails = async (overrideIds?: string[], includeAttachments: boolean = true) => {
+        const sid = await ensureSessionId();
+        if (!sid) {
+            setUploadError('No active session. Create/select one first.');
             return;
         }
-        const loginUrl = getGmailLoginUrl();
-        const popup = window.open(loginUrl, '_blank', 'noopener,noreferrer');
-        if (!popup) {
-            window.location.href = loginUrl;
+        if (!gmailStatus?.connected) {
+            setUploadError('Connect Gmail first.');
+            return;
         }
-        setGmailMessage('Complete Gmail OAuth in the opened tab, then click Refresh Gmail Status.');
+        
+        const idsToIngest = overrideIds ?? selectedGmailEmails;
+        if (idsToIngest.length === 0) {
+            setUploadError('Select at least one email.');
+            return;
+        }
+
+        setGmailSyncing(true);
+        setUploadError(null);
+        try {
+            const result = await ingestGmailEmails(sid, idsToIngest, includeAttachments);
+            setGmailMessage(result.message);
+            await refreshReviewGate(sid);
+        } catch (e) {
+            setUploadError(e instanceof Error ? e.message : 'Gmail sync failed');
+        } finally {
+            setGmailSyncing(false);
+        }
     };
 
     const disconnectSlackWorkspace = async () => {
@@ -370,6 +411,7 @@ export default function IngestionPage() {
     }, [sessionId]);
 
     return (
+        <>
         <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-[1400px]">
             {/* Header */}
             <div>
@@ -520,76 +562,122 @@ export default function IngestionPage() {
                     <div className="flex items-center gap-3">
                         <div
                             className={`w-10 h-10 rounded-xl border flex items-center justify-center ${
-                                gmailStatus.connected
+                                gmailStatus?.connected
                                     ? 'bg-emerald-500/15 border-emerald-500/25'
-                                    : gmailStatus.available
+                                    : gmailStatus?.available
                                         ? 'bg-blue-500/15 border-blue-500/25'
                                         : 'bg-white/5 border-white/10'
                             }`}
                         >
-                            <Mail size={18} className={gmailStatus.connected ? 'text-emerald-400' : gmailStatus.available ? 'text-blue-300' : 'text-zinc-600'} />
+                            <Mail size={18} className={gmailStatus?.connected ? 'text-emerald-400' : gmailStatus?.available ? 'text-blue-300' : 'text-zinc-600'} />
                         </div>
                         <div>
                             <h3 className="text-sm font-semibold text-zinc-100">Gmail</h3>
                             <div className="flex items-center gap-1.5 mt-0.5">
                                 <div
                                     className={`w-1.5 h-1.5 rounded-full ${
-                                        !gmailChecked
+                                        gmailLoading
                                             ? 'bg-zinc-500 animate-pulse'
-                                            : gmailStatus.connected
+                                            : gmailStatus?.connected
                                                 ? 'bg-emerald-400'
-                                                : gmailStatus.available
+                                                : gmailStatus?.available
                                                     ? 'bg-blue-400'
                                                     : 'bg-zinc-600'
                                     }`}
                                 />
                                 <span
                                     className={`text-[11px] font-medium ${
-                                        !gmailChecked
+                                        gmailLoading
                                             ? 'text-zinc-500'
-                                            : gmailStatus.connected
+                                            : gmailStatus?.connected
                                                 ? 'text-emerald-400'
-                                                : gmailStatus.available
+                                                : gmailStatus?.available
                                                     ? 'text-blue-300'
                                                     : 'text-zinc-500'
                                     }`}
                                 >
-                                    {!gmailChecked ? 'Checking' : gmailStatus.connected ? 'Connected' : gmailStatus.available ? 'Available' : 'Unavailable'}
+                                    {gmailLoading ? 'Syncing...' : gmailStatus?.connected ? 'Connected' : gmailStatus?.available ? 'Available' : 'Unavailable'}
                                 </span>
                             </div>
                         </div>
                     </div>
+
                     <p className="text-xs text-zinc-500">
-                        {!gmailChecked ? 'Checking backend Gmail endpoint...' : gmailStatus.message}
+                        {gmailLoading ? 'Fetching emails...' : (gmailStatus?.message ?? 'Checking status...')}
                     </p>
-                    <div className="space-y-2">
+
+                    {/* Email selector */}
+                    <div>
+                        <p className="text-[11px] text-zinc-500 uppercase tracking-wider mb-2 font-medium">Recent Emails</p>
+                        <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                            {!gmailStatus?.connected ? (
+                                <p className="text-xs text-zinc-500 px-2 py-2">Connect Gmail to load emails.</p>
+                            ) : gmailLoading ? (
+                                <p className="text-xs text-zinc-500 px-2 py-2">Loading emails...</p>
+                            ) : gmailEmails.length === 0 ? (
+                                <p className="text-xs text-zinc-500 px-2 py-2">No emails found.</p>
+                            ) : (
+                                gmailEmails.map((email) => (
+                                    <label
+                                        key={email.message_id}
+                                        className="flex items-center gap-2.5 p-2 rounded-lg cursor-pointer hover:bg-white/5 transition-colors"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedGmailEmails.includes(email.message_id)}
+                                            onChange={() => {
+                                                setSelectedGmailEmails((prev) =>
+                                                    prev.includes(email.message_id)
+                                                        ? prev.filter((id) => id !== email.message_id)
+                                                        : [...prev, email.message_id]
+                                                );
+                                            }}
+                                            className="w-3.5 h-3.5 accent-red-400 cursor-pointer"
+                                        />
+                                        <span className="text-xs text-zinc-300 flex-1 truncate" title={email.subject}>
+                                            {email.subject || '(No Subject)'}
+                                        </span>
+                                    </label>
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                    {!gmailStatus?.connected ? (
                         <button
-                            onClick={startGmailConnect}
-                            disabled={!gmailChecked || !gmailStatus.available || gmailStatus.connected}
-                            className={`w-full text-sm flex items-center justify-center gap-2 ${
-                                gmailStatus.available && !gmailStatus.connected
-                                    ? 'btn-primary'
-                                    : 'btn-secondary'
-                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                            onClick={() => setGmailReplicaOpen(true)}
+                            disabled={gmailLoading || !gmailStatus?.available}
+                            className="btn-primary w-full text-sm flex items-center justify-center gap-2 disabled:opacity-50"
                         >
                             <Mail size={13} />
-                            {!gmailChecked
-                                ? 'Checking Gmail...'
-                                : gmailStatus.connected
-                                    ? 'Gmail Connected'
-                                    : gmailStatus.available
-                                        ? 'Connect Gmail'
-                                        : 'Gmail Unavailable'}
+                            Advanced
                         </button>
-                        <button
-                            onClick={syncGmailData}
-                            disabled={!gmailChecked}
-                            className="btn-secondary w-full text-xs py-2 disabled:opacity-50"
-                        >
-                            <RefreshCw size={12} className="inline mr-1" />
-                            Refresh Gmail Status
-                        </button>
-                    </div>
+                    ) : (
+                        <div className="space-y-2">
+                            <button
+                                onClick={() => setGmailReplicaOpen(true)}
+                                className="btn-primary w-full text-sm flex items-center justify-center gap-2"
+                            >
+                                <Mail size={13} />
+                                Advanced
+                            </button>
+                            <button
+                                onClick={() => syncSelectedGmailEmails()}
+                                disabled={gmailSyncing || selectedGmailEmails.length === 0}
+                                className="btn-secondary w-full text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                {gmailSyncing ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
+                                {gmailSyncing ? 'Ingesting...' : 'Ingest Selected'}
+                            </button>
+                            <button
+                                onClick={syncGmailData}
+                                className="btn-secondary w-full text-xs py-2"
+                            >
+                                <RefreshCw size={12} className="inline mr-1" />
+                                Refresh Status
+                            </button>
+                        </div>
+                    )}
                 </motion.div>
 
                 {/* File Upload */}
@@ -947,5 +1035,20 @@ export default function IngestionPage() {
                 )}
             </Drawer>
         </div>
+        
+        {/* Gmail Replica Window */}
+        <AnimatePresence>
+            {gmailReplicaOpen && (
+                <GmailReplica 
+                    onClose={() => setGmailReplicaOpen(false)}
+                    onIngest={(ids, includeAtts) => {
+                        syncSelectedGmailEmails(ids, includeAtts);
+                        setGmailReplicaOpen(false);
+                    }}
+                    isIngesting={gmailSyncing}
+                />
+            )}
+        </AnimatePresence>
+        </>
     );
 }
