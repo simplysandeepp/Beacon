@@ -117,3 +117,21 @@ def healthz_head(request: Request):
         return JSONResponse(status_code=401, content={"status": "unauthorized"})
 
     return JSONResponse(status_code=200, content={})
+
+
+@app.get("/wake")
+def wake():
+    """
+    Lightweight endpoint to wake the backend from sleep.
+    Returns immediately with wake confirmation and estimated ready time.
+    """
+    wake_time = datetime.now(timezone.utc)
+    estimated_ready_time = wake_time.timestamp() + 30  # 30 seconds wake time
+    
+    return {
+        "status": "waking",
+        "wake_timestamp": wake_time.isoformat(),
+        "estimated_ready_timestamp": datetime.fromtimestamp(estimated_ready_time, tz=timezone.utc).isoformat(),
+        "estimated_ready_seconds": 30,
+        "message": "Backend is waking up"
+    }
