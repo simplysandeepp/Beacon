@@ -53,7 +53,6 @@
 15. [Local Development Setup](#15-local-development-setup)
 16. [Environment Variables](#16-environment-variables)
 17. [Deployment](#17-deployment)
-18. [Team](#18-team)
 
 ---
 
@@ -860,20 +859,6 @@ See the full step-by-step guide in **[DEPLOY-GUIDE.md](DEPLOY-GUIDE.md)** — co
 
 ---
 
-## 18. Team
-
-| Name | Role | GitHub |
-|---|---|---|
-| Sandeep Prajapati | Team Lead | [@simplysandeepp](https://github.com/simplysandeepp) |
-| Kurian Jose | Team Member | [@KurianJose7586](https://github.com/KurianJose7586) |
-| Preet Biswas | Team Member | [@preetbiswas12](https://github.com/preetbiswas12) |
-| Aryan Singh | Team Member | [@DevAryanSin](https://github.com/DevAryanSin) |
-
----
-
-<div align="center">
-
-Built with love for HackFest 2.0
 
 [Live Demo](https://brd-agent-xi.vercel.app/) &middot; [Deploy Guide](DEPLOY-GUIDE.md) &middot; [Contributing](CONTRIBUTING.md)
 
